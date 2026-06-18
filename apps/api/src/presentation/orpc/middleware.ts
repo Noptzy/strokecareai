@@ -4,7 +4,7 @@ import type { ORPCContext } from "./context.ts";
 import { mapAppErrorToORPCError } from "./error-mapping.ts";
 import type { AuthedContext } from "../../application/shared/context.ts";
 
-export const publicProcedure = os.context<ORPCContext>().use(async (ctx, next) => {
+export const publicProcedure = os.$context<ORPCContext>().use(async (ctx, next) => {
   try {
     return await next({});
   } catch (err) {

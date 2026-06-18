@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html class="light" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>StrokeCare AI Companion</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #dcc0bf;
+            border-radius: 10px;
+        }
+        .chat-bubble-ai {
+            position: relative;
+            background: #ffffff;
+            border-left: 3px solid #892d32;
+        }
+        .editorial-line {
+            height: 1px;
+            background: linear-gradient(to right, #892d32, transparent);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed": "#3b0900",
+                        "primary": "#892d32",
+                        "surface-container-low": "#eef5f7",
+                        "primary-fixed-dim": "#ffb3b2",
+                        "tertiary": "#735c00",
+                        "on-tertiary": "#ffffff",
+                        "secondary": "#99452c",
+                        "on-primary-container": "#ffdad9",
+                        "tertiary-container": "#cba72f",
+                        "error": "#ba1a1a",
+                        "surface-container-highest": "#dde4e6",
+                        "inverse-on-surface": "#ebf2f4",
+                        "tertiary-fixed-dim": "#e9c349",
+                        "on-primary-fixed-variant": "#81272c",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#564242",
+                        "on-tertiary-fixed": "#241a00",
+                        "secondary-fixed-dim": "#ffb5a0",
+                        "outline-variant": "#dcc0bf",
+                        "secondary-container": "#ff9475",
+                        "surface-bright": "#f4fafd",
+                        "surface": "#f4fafd",
+                        "outline": "#897271",
+                        "inverse-primary": "#ffb3b2",
+                        "secondary-fixed": "#ffdbd1",
+                        "primary-container": "#a84448",
+                        "surface-tint": "#a03e42",
+                        "inverse-surface": "#2b3234",
+                        "surface-container-high": "#e2e9ec",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#762b14",
+                        "surface-container": "#e8eff1",
+                        "on-primary-fixed": "#410008",
+                        "background": "#f4fafd",
+                        "primary-fixed": "#ffdad9",
+                        "tertiary-fixed": "#ffe088",
+                        "on-tertiary-container": "#4e3d00",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#574500",
+                        "on-surface": "#161d1f",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-background": "#161d1f",
+                        "surface-variant": "#dde4e6",
+                        "on-secondary-fixed-variant": "#7b2e17",
+                        "surface-dim": "#d4dbdd"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "section-gap": "64px",
+                        "gutter": "24px",
+                        "stack-sm": "12px",
+                        "stack-md": "24px",
+                        "unit": "8px",
+                        "container-padding": "32px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "caption": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "0em", "fontWeight": "500"}],
+                        "caption": ["14px", {"lineHeight": "1.4", "letterSpacing": "0.01em", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "letterSpacing": "0.01em", "fontWeight": "400"}],
+                        "display": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "label-caps": ["12px", {"lineHeight": "1.4", "letterSpacing": "0.1em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["26px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0.01em", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="w-full top-0 sticky z-40 bg-surface/80 backdrop-blur-md">
+<nav class="flex justify-between items-center max-w-[1100px] mx-auto px-gutter py-4">
+<div class="font-headline-md text-headline-md font-bold text-primary">StrokeCare AI</div>
+<div class="hidden md:flex gap-8 items-center">
+<a class="text-on-surface-variant font-normal hover:text-primary transition-colors font-body-md text-body-md" href="#">Home</a>
+<a class="text-on-surface-variant font-normal hover:text-primary transition-colors font-body-md text-body-md" href="#">Kenali Stroke</a>
+<a class="text-on-surface-variant font-normal hover:text-primary transition-colors font-body-md text-body-md" href="#">Dashboard</a>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-full font-label-caps text-label-caps hover:bg-primary-container transition-all cursor-pointer active:opacity-70">Masuk</button>
+</div>
+<div class="md:hidden">
+<span class="material-symbols-outlined text-primary text-2xl">menu</span>
+</div>
+</nav>
+</header>
+<!-- Main Content: AI Chat Interface -->
+<main class="flex-grow flex flex-col max-w-[1100px] mx-auto w-full px-gutter pt-8 pb-32 md:pb-8">
+<!-- Header Section -->
+<div class="mb-section-gap border-l-2 border-primary pl-6">
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-2">StrokeCare AI Companion</h1>
+<p class="font-body-md text-on-surface-variant max-w-xl">Panduan kesehatan personal yang memahami profil risiko Anda. Berdiskusi dengan tenang dan dapatkan informasi berbasis data.</p>
+<div class="editorial-line mt-6 w-24"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter flex-grow">
+<!-- Left Sidebar: Context Summary (Desktop Only) -->
+<aside class="hidden md:block md:col-span-3 space-y-stack-md">
+<div class="p-stack-md bg-surface-container-low rounded-xl border border-outline-variant/10">
+<span class="font-label-caps text-label-caps text-secondary block mb-4 uppercase tracking-widest">Profil Risiko</span>
+<ul class="space-y-4">
+<li class="flex flex-col">
+<span class="text-xs text-on-surface-variant/60">Usia</span>
+<span class="font-body-md font-semibold">58 Tahun</span>
+</li>
+<li class="flex flex-col">
+<span class="text-xs text-on-surface-variant/60">BMI</span>
+<span class="font-body-md font-semibold">27.4 (Overweight)</span>
+</li>
+<li class="flex flex-col">
+<span class="text-xs text-on-surface-variant/60">Faktor Utama</span>
+<span class="font-body-md font-semibold">Hipertensi Ringan</span>
+</li>
+</ul>
+</div>
+<div class="p-stack-md">
+<span class="font-label-caps text-label-caps text-on-surface-variant/40 block mb-2">CATATAN</span>
+<p class="text-caption text-on-surface-variant/70 italic leading-relaxed">Informasi yang diberikan bersifat edukatif dan bukan pengganti saran medis profesional.</p>
+</div>
+</aside>
+<!-- Chat Window -->
+<section class="md:col-span-9 flex flex-col h-[600px] md:h-auto bg-surface-container-lowest border border-outline-variant/20 rounded-xl overflow-hidden shadow-sm">
+<!-- Chat Messages Scroll Area -->
+<div class="flex-grow overflow-y-auto p-gutter space-y-8 scroll-smooth" id="chat-scroller">
+<!-- AI Welcome Message -->
+<div class="flex gap-4 max-w-2xl">
+<div class="flex-grow">
+<div class="chat-bubble-ai p-stack-md rounded-r-lg">
+<p class="text-body-md text-on-surface leading-relaxed">Selamat pagi. Saya telah meninjau profil kesehatan Anda. Berdasarkan data usia 58 tahun dan riwayat hipertensi Anda, ada beberapa hal yang bisa kita diskusikan untuk menjaga kesehatan saraf Anda. Apa yang ingin Anda tanyakan hari ini?</p>
+</div>
+<span class="text-[10px] text-on-surface-variant/40 mt-2 block font-label-caps">STROKECARE AI • SEKARANG</span>
+</div>
+</div>
+<!-- Suggested Questions -->
+<div class="flex flex-wrap gap-stack-sm pt-4">
+<button class="px-4 py-2 border border-outline-variant hover:border-primary hover:text-primary transition-all rounded-full text-caption font-medium bg-white" onclick="sendPredefined('Apakah umur saya berisiko?')">Apakah umur saya berisiko?</button>
+<button class="px-4 py-2 border border-outline-variant hover:border-primary hover:text-primary transition-all rounded-full text-caption font-medium bg-white" onclick="sendPredefined('Bagaimana cara menurunkan risiko?')">Bagaimana cara menurunkan risiko?</button>
+<button class="px-4 py-2 border border-outline-variant hover:border-primary hover:text-primary transition-all rounded-full text-caption font-medium bg-white" onclick="sendPredefined('Apa gejala stroke yang harus diwaspadai?')">Apa gejala stroke yang harus diwaspadai?</button>
+</div>
+<!-- Dynamic Messages will go here -->
+<div class="space-y-8" id="message-container"></div>
+</div>
+<!-- Input Area -->
+<div class="p-gutter bg-surface-container-low/50 border-t border-outline-variant/10">
+<div class="relative flex items-center">
+<textarea class="w-full bg-white border border-outline-variant/30 rounded-xl px-6 py-4 pr-16 focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all resize-none font-body-md" id="chat-input" placeholder="Tanyakan sesuatu tentang kesehatan Anda..." rows="1"></textarea>
+<button class="absolute right-4 p-2 bg-primary text-on-primary rounded-lg hover:scale-105 active:scale-95 transition-transform" id="send-btn">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+<div class="flex justify-between items-center mt-3">
+<span class="text-[10px] text-on-surface-variant/40 font-label-caps uppercase tracking-wider">Terhubung dengan aman • Data terenkripsi</span>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-on-surface-variant/40 text-lg cursor-pointer hover:text-primary">mic</span>
+<span class="material-symbols-outlined text-on-surface-variant/40 text-lg cursor-pointer hover:text-primary">attach_file</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full mt-section-gap border-t border-outline-variant/10 bg-surface-container-low">
+<div class="flex flex-col md:flex-row justify-between items-center max-w-[1100px] mx-auto px-gutter py-stack-md">
+<span class="font-caption text-caption text-on-surface-variant">© 2024 StrokeCare AI. Precision in Care.</span>
+<div class="flex gap-6 mt-4 md:mt-0">
+<a class="font-caption text-caption text-on-surface-variant hover:text-secondary transition-colors" href="#">Privacy Policy</a>
+<a class="font-caption text-caption text-on-surface-variant hover:text-secondary transition-colors" href="#">Terms of Service</a>
+<a class="font-caption text-caption text-on-surface-variant hover:text-secondary transition-colors" href="#">Medical Disclaimer</a>
+</div>
+</div>
+</footer>
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 md:hidden bg-surface-container-low border-t border-outline-variant/20 shadow-sm rounded-t-full">
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-caps text-[10px] uppercase">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-caps text-[10px] uppercase">Edukasi</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-caps text-[10px] uppercase">Dashboard</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-caps text-[10px] uppercase">Profil</span>
+</div>
+</nav>
+<script>
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const messageContainer = document.getElementById('message-container');
+        const chatScroller = document.getElementById('chat-scroller');
+
+        function appendMessage(text, isUser = false) {
+            const wrapper = document.createElement('div');
+            wrapper.className = isUser ? 'flex flex-row-reverse gap-4 animate-fade-in' : 'flex gap-4 max-w-2xl animate-fade-in';
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex-grow';
+            
+            const bubble = document.createElement('div');
+            if (isUser) {
+                bubble.className = 'bg-primary-container/10 p-stack-md rounded-l-lg border-r-3 border-primary text-right';
+                bubble.style.borderRight = '3px solid #892d32';
+            } else {
+                bubble.className = 'chat-bubble-ai p-stack-md rounded-r-lg';
+            }
+            
+            bubble.innerHTML = `<p class="text-body-md text-on-surface leading-relaxed">${text}</p>`;
+            
+            const meta = document.createElement('span');
+            meta.className = `text-[10px] text-on-surface-variant/40 mt-2 block font-label-caps ${isUser ? 'text-right' : ''}`;
+            meta.innerText = isUser ? 'ANDA • BARU SAJA' : 'STROKECARE AI • BARU SAJA';
+            
+            messageDiv.appendChild(bubble);
+            messageDiv.appendChild(meta);
+            wrapper.appendChild(messageDiv);
+            messageContainer.appendChild(wrapper);
+            
+            // Scroll to bottom
+            chatScroller.scrollTop = chatScroller.scrollHeight;
+        }
+
+        function handleSend() {
+            const text = chatInput.value.trim();
+            if (text) {
+                appendMessage(text, true);
+                chatInput.value = '';
+                
+                // Mock AI response
+                setTimeout(() => {
+                    const response = "Terima kasih atas pertanyaannya. Meninjau data Anda, langkah pertama yang paling efektif adalah memantau asupan garam harian untuk membantu mengelola hipertensi Anda. Apakah Anda ingin tahu lebih banyak tentang pola makan DASH?";
+                    appendMessage(response, false);
+                }, 1000);
+            }
+        }
+
+        function sendPredefined(text) {
+            appendMessage(text, true);
+            setTimeout(() => {
+                let response = "";
+                if (text.includes("berisiko")) {
+                    response = "Berdasarkan usia Anda yang 58 tahun, risiko stroke secara alami meningkat, namun faktor ini dapat dikelola. Fokus kita adalah pada variabel yang bisa diubah seperti tekanan darah dan gaya hidup aktif.";
+                } else {
+                    response = "Menurunkan risiko stroke melibatkan kombinasi aktivitas fisik moderat (seperti jalan cepat 30 menit sehari) dan menjaga pola makan rendah lemak jenuh. Mengingat BMI Anda di 27.4, penurunan berat badan bertahap juga sangat disarankan.";
+                }
+                appendMessage(response, false);
+            }, 800);
+        }
+
+        sendBtn.addEventListener('click', handleSend);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+            }
+        });
+
+        // Simple typing effect for the first message (visual only)
+        document.addEventListener('DOMContentLoaded', () => {
+            chatScroller.scrollTop = chatScroller.scrollHeight;
+        });
+    </script>
+</body></html>
