@@ -1,5 +1,13 @@
 $schema: 'https://moonrepo.dev/schemas/tasks.json'
 
+fileGroups:
+  sources:
+    - 'src/**/*'
+    - 'package.json'
+  tests:
+    - 'tests/**/*'
+    - '**/*.test.*'
+
 tasks:
   check:
     command: 'tsc --noEmit'

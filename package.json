@@ -13,5 +13,12 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3"
-  }
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@biomejs/biome",
+      "esbuild"
+    ]
+  },
+  "packageManager": "pnpm@10.33.0"
 }

@@ -4,7 +4,7 @@ import { authClient } from "../libs/auth/client.ts";
 
 interface RouterContext {
   queryClient: QueryClient;
-  session: any | null; // typing as any for simplicity in this setup
+  session: any | null;
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -16,9 +16,13 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       return { session: null };
     }
   },
-  component: () => (
+  component: RootComponent,
+});
+
+function RootComponent() {
+  return (
     <>
       <Outlet />
     </>
-  ),
-});
+  );
+}

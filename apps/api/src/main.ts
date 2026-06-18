@@ -6,7 +6,7 @@ import { buildAuth } from "./infrastructure/auth/better-auth.ts";
 import { createRedisCache } from "./infrastructure/cache/redis.ts";
 import { buildUseCases } from "./application/use-cases.ts";
 import { buildRouter } from "./presentation/routers/index.ts";
-import { RPCHandler } from "@orpc/server/hono";
+import { RPCHandler } from "@orpc/server/fetch";
 import { cors } from "hono/cors";
 
 async function main() {
