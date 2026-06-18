@@ -1,0 +1,21 @@
+$schema: 'https://moonrepo.dev/schemas/tasks.json'
+
+tasks:
+  check:
+    command: 'tsc --noEmit'
+    inputs:
+      - '@globs(sources)'
+      - 'tsconfig.json'
+      - '/tsconfig.base.json'
+  
+  lint:
+    command: 'biome check .'
+    inputs:
+      - '@globs(sources)'
+      - '/biome.json'
+      
+  format:
+    command: 'biome format --write .'
+    inputs:
+      - '@globs(sources)'
+      - '/biome.json'

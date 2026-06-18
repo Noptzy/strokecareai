@@ -1,0 +1,26 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+project:
+  type: 'application'
+language: 'typescript'
+
+tasks:
+  dev:
+    command: 'npm run dev'
+  build:
+    command: 'npm run build'
+    inputs:
+      - '@globs(sources)'
+    outputs:
+      - 'dist'
+  test:
+    command: 'vitest run'
+    inputs:
+      - '@globs(sources)'
+  db-generate:
+    command: 'npm run db:generate'
+  db-push:
+    command: 'npm run db:push'
+  db-studio:
+    command: 'npm run db:studio'
+  db-seed:
+    command: 'npm run db:seed'

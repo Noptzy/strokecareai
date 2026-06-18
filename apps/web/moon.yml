@@ -1,0 +1,21 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+project:
+  type: 'application'
+language: 'typescript'
+
+dependsOn:
+  - 'api'
+
+tasks:
+  dev:
+    command: 'npm run dev'
+  build:
+    command: 'npm run build'
+    inputs:
+      - '@globs(sources)'
+    outputs:
+      - 'dist'
+  test:
+    command: 'vitest run'
+    inputs:
+      - '@globs(sources)'
