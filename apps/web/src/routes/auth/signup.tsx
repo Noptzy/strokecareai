@@ -5,27 +5,28 @@ import { authClient } from "@web/libs/auth/client"
 import { useUIStore } from "@web/hooks/use-ui-store"
 import { z } from "zod"
 
-export const Route = createFileRoute("/auth/login")({
-	component: LoginPage,
+export const Route = createFileRoute("/auth/signup")({
+	component: SignupPage,
 })
 
+const nameField = z.string().min(2, "Nama minimal 2 karakter").max(80)
 const emailField = z.string().email("Masukkan email yang valid")
-const passwordField = z.string().min(1, "Kata sandi wajib diisi")
+const passwordField = z.string().min(8, "Kata sandi minimal 8 karakter")
 
-function LoginPage() {
+function SignupPage() {
 	const navigate = useNavigate()
-	const { showLoginPassword: showPassword, setShowLoginPassword: setShowPassword } = useUIStore()
+	const { showSignupPassword: showPassword, setShowSignupPassword: setShowPassword } = useUIStore()
 	const form = useForm({
-		defaultValues: { email: "", password: "" },
+		defaultValues: { name: "", email: "", password: "" },
 		validators: {
 			onSubmitAsync: async ({ value }) => {
-				const res = await authClient.signIn.email(value)
-				if (res.error) return res.error.message ?? "Login gagal"
+				const res = await authClient.signUp.email(value)
+				if (res.error) return res.error.message ?? "Pendaftaran gagal"
 				return null
 			},
 		},
 		onSubmit: async () => {
-			await navigate({ to: "/dashboard" })
+			await navigate({ to: "/onboarding" })
 		},
 	})
 
@@ -34,12 +35,10 @@ function LoginPage() {
 			<div className="max-w-md w-full bg-surface-container-lowest p-10 rounded-2xl border border-outline/20 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.08)] space-y-stack-md">
 				<header className="text-center space-y-2">
 					<span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">
-						Selamat Datang Kembali
+						Mulai Perjalanan Anda
 					</span>
-					<h1 className="font-headline-lg text-headline-lg text-on-surface">Masuk ke StrokeCare AI</h1>
-					<p className="font-body-md text-on-surface-variant">
-						Lanjutkan perjalanan pemulihan Anda dengan akses aman ke data pribadi.
-					</p>
+					<h1 className="font-headline-lg text-headline-lg text-on-surface">Daftar StrokeCare AI</h1>
+					<p className="font-body-md text-on-surface-variant">Buat akun untuk melacak kesehatan Anda dengan aman.</p>
 				</header>
 
 				<form.Subscribe selector={(s) => s.errorMap.onSubmit}>
@@ -59,6 +58,32 @@ function LoginPage() {
 						void form.handleSubmit()
 					}}
 				>
+					<form.Field name="name" validators={{ onChange: nameField }}>
+						{(field) => (
+							<div className="space-y-2">
+								<label htmlFor={field.name} className="font-label-caps text-label-caps text-on-surface-variant">
+									Nama
+								</label>
+								<input
+									id={field.name}
+									type="text"
+									required
+									autoComplete="name"
+									value={field.state.value}
+									onChange={(e) => field.handleChange(e.target.value)}
+									onBlur={field.handleBlur}
+									className="w-full bg-surface-container-lowest border border-outline/20 focus:border-primary focus:ring-0 rounded-lg p-3 font-body-md transition-all"
+									placeholder="Nama lengkap"
+								/>
+								{!field.state.meta.isValid && (
+									<p className="text-error text-xs" id={`${field.name}-error`}>
+										{field.state.meta.errors.map((err) => err?.message).join(", ")}
+									</p>
+								)}
+							</div>
+						)}
+					</form.Field>
+
 					<form.Field name="email" validators={{ onChange: emailField }}>
 						{(field) => (
 							<div className="space-y-2">
@@ -89,14 +114,14 @@ function LoginPage() {
 						{(field) => (
 							<div className="space-y-2">
 								<label htmlFor={field.name} className="font-label-caps text-label-caps text-on-surface-variant">
-									Kata Sandi
+									Kata Sandi (min. 8 karakter)
 								</label>
 								<div className="relative">
 									<input
 										id={field.name}
 										type={showPassword ? "text" : "password"}
 										required
-										autoComplete="current-password"
+										autoComplete="new-password"
 										value={field.state.value}
 										onChange={(e) => field.handleChange(e.target.value)}
 										onBlur={field.handleBlur}
@@ -162,16 +187,16 @@ function LoginPage() {
 								disabled={isSubmitting}
 								className="w-full bg-primary text-on-primary rounded-lg p-3 font-label-caps text-label-caps uppercase tracking-widest hover:opacity-90 disabled:opacity-50 transition-opacity"
 							>
-								{isSubmitting ? "Memproses..." : "Masuk"}
+								{isSubmitting ? "Memproses..." : "Daftar"}
 							</button>
 						)}
 					</form.Subscribe>
 				</form>
 
 				<p className="text-center font-body-md text-on-surface-variant">
-					Belum punya akun?{" "}
-					<Link to="/auth/signup" className="text-primary hover:underline font-medium">
-						Daftar
+					Sudah punya akun?{" "}
+					<Link to="/auth/login" className="text-primary hover:underline font-medium">
+						Masuk
 					</Link>
 				</p>
 			</div>

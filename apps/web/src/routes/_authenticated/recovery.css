@@ -1,0 +1,35 @@
+.recovery-hero {
+	background: linear-gradient(
+		135deg,
+		oklch(98% 0.02 200) 0%,
+		oklch(96% 0.04 200) 50%,
+		oklch(94% 0.06 200) 100%
+	);
+}
+
+.recovery-hero-blob {
+	position: absolute;
+	border-radius: 9999px;
+	filter: blur(80px);
+	opacity: 0.4;
+	pointer-events: none;
+}
+
+.recovery-card-hover {
+	transition:
+		transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.recovery-card-hover:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
+}
+
+.recovery-action-arrow {
+	transition: transform 0.2s ease;
+}
+
+.recovery-card-hover:hover .recovery-action-arrow {
+	transform: translateX(4px);
+}

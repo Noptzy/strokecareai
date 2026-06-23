@@ -1,0 +1,69 @@
+.dashboard-hero {
+	background: linear-gradient(
+		135deg,
+		oklch(98% 0.01 30) 0%,
+		oklch(96% 0.03 30) 50%,
+		oklch(94% 0.05 30) 100%
+	);
+}
+
+.dashboard-hero-blob {
+	position: absolute;
+	border-radius: 9999px;
+	filter: blur(80px);
+	opacity: 0.45;
+	pointer-events: none;
+}
+
+.dashboard-card-hover {
+	transition:
+		transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+		border-color 0.2s ease;
+}
+
+.dashboard-card-hover:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
+}
+
+.dashboard-action-arrow {
+	transition: transform 0.2s ease;
+}
+
+.dashboard-card-hover:hover .dashboard-action-arrow {
+	transform: translateX(4px);
+}
+
+.dashboard-risk-ring {
+	transform: rotate(-90deg);
+}
+
+.dashboard-progress-track {
+	height: 6px;
+	background: oklch(92% 0.01 30);
+	border-radius: 9999px;
+	overflow: hidden;
+}
+
+.dashboard-progress-fill {
+	height: 100%;
+	background: linear-gradient(90deg, oklch(60% 0.18 25), oklch(55% 0.22 25));
+	border-radius: 9999px;
+	transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes dashboard-fade-up {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.dashboard-animate {
+	animation: dashboard-fade-up 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}

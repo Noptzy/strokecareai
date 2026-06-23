@@ -10,18 +10,32 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as KenaliStrokeRouteImport } from './routes/kenali-stroke'
 import { Route as PublicRouteImport } from './routes/_public'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
-import { Route as PublicKenaliStrokeRouteImport } from './routes/_public/kenali-stroke'
 import { Route as AuthenticatedRecoveryRouteImport } from './routes/_authenticated/recovery'
+import { Route as AuthenticatedNotFoundRouteImport } from './routes/_authenticated/not-found'
+import { Route as AuthenticatedDiagnosaRouteImport } from './routes/_authenticated/diagnosa'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCompanionRouteImport } from './routes/_authenticated/companion'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
+import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
+import { Route as AuthenticatedAdminProfileRouteImport } from './routes/_authenticated/admin/profile'
+import { Route as AuthenticatedAdminKnowledgeRouteImport } from './routes/_authenticated/admin/knowledge'
 
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KenaliStrokeRoute = KenaliStrokeRouteImport.update({
+  id: '/kenali-stroke',
+  path: '/kenali-stroke',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PublicRoute = PublicRouteImport.update({
@@ -37,19 +51,29 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PublicRoute,
 } as any)
+const AuthSignupRoute = AuthSignupRouteImport.update({
+  id: '/auth/signup',
+  path: '/auth/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/auth/login',
   path: '/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PublicKenaliStrokeRoute = PublicKenaliStrokeRouteImport.update({
-  id: '/kenali-stroke',
-  path: '/kenali-stroke',
-  getParentRoute: () => PublicRoute,
-} as any)
 const AuthenticatedRecoveryRoute = AuthenticatedRecoveryRouteImport.update({
   id: '/recovery',
   path: '/recovery',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedNotFoundRoute = AuthenticatedNotFoundRouteImport.update({
+  id: '/not-found',
+  path: '/not-found',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedDiagnosaRoute = AuthenticatedDiagnosaRouteImport.update({
+  id: '/diagnosa',
+  path: '/diagnosa',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -62,74 +86,161 @@ const AuthenticatedCompanionRoute = AuthenticatedCompanionRouteImport.update({
   path: '/companion',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminSettingsRoute =
+  AuthenticatedAdminSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminProfileRoute =
+  AuthenticatedAdminProfileRouteImport.update({
+    id: '/profile',
+    path: '/profile',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminKnowledgeRoute =
+  AuthenticatedAdminKnowledgeRouteImport.update({
+    id: '/knowledge',
+    path: '/knowledge',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
+  '/kenali-stroke': typeof KenaliStrokeRoute
   '/onboarding': typeof OnboardingRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/companion': typeof AuthenticatedCompanionRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/diagnosa': typeof AuthenticatedDiagnosaRoute
+  '/not-found': typeof AuthenticatedNotFoundRoute
   '/recovery': typeof AuthenticatedRecoveryRoute
-  '/kenali-stroke': typeof PublicKenaliStrokeRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/signup': typeof AuthSignupRoute
+  '/admin/knowledge': typeof AuthenticatedAdminKnowledgeRoute
+  '/admin/profile': typeof AuthenticatedAdminProfileRoute
+  '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
+  '/kenali-stroke': typeof KenaliStrokeRoute
   '/onboarding': typeof OnboardingRoute
   '/companion': typeof AuthenticatedCompanionRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/diagnosa': typeof AuthenticatedDiagnosaRoute
+  '/not-found': typeof AuthenticatedNotFoundRoute
   '/recovery': typeof AuthenticatedRecoveryRoute
-  '/kenali-stroke': typeof PublicKenaliStrokeRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/signup': typeof AuthSignupRoute
+  '/admin/knowledge': typeof AuthenticatedAdminKnowledgeRoute
+  '/admin/profile': typeof AuthenticatedAdminProfileRoute
+  '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
+  '/kenali-stroke': typeof KenaliStrokeRoute
   '/onboarding': typeof OnboardingRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/companion': typeof AuthenticatedCompanionRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/diagnosa': typeof AuthenticatedDiagnosaRoute
+  '/_authenticated/not-found': typeof AuthenticatedNotFoundRoute
   '/_authenticated/recovery': typeof AuthenticatedRecoveryRoute
-  '/_public/kenali-stroke': typeof PublicKenaliStrokeRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/signup': typeof AuthSignupRoute
   '/_public/': typeof PublicIndexRoute
+  '/_authenticated/admin/knowledge': typeof AuthenticatedAdminKnowledgeRoute
+  '/_authenticated/admin/profile': typeof AuthenticatedAdminProfileRoute
+  '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/kenali-stroke'
     | '/onboarding'
+    | '/admin'
     | '/companion'
     | '/dashboard'
+    | '/diagnosa'
+    | '/not-found'
     | '/recovery'
-    | '/kenali-stroke'
     | '/auth/login'
+    | '/auth/signup'
+    | '/admin/knowledge'
+    | '/admin/profile'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/kenali-stroke'
     | '/onboarding'
     | '/companion'
     | '/dashboard'
+    | '/diagnosa'
+    | '/not-found'
     | '/recovery'
-    | '/kenali-stroke'
     | '/auth/login'
+    | '/auth/signup'
+    | '/admin/knowledge'
+    | '/admin/profile'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/admin'
   id:
     | '__root__'
     | '/_authenticated'
     | '/_public'
+    | '/kenali-stroke'
     | '/onboarding'
+    | '/_authenticated/admin'
     | '/_authenticated/companion'
     | '/_authenticated/dashboard'
+    | '/_authenticated/diagnosa'
+    | '/_authenticated/not-found'
     | '/_authenticated/recovery'
-    | '/_public/kenali-stroke'
     | '/auth/login'
+    | '/auth/signup'
     | '/_public/'
+    | '/_authenticated/admin/knowledge'
+    | '/_authenticated/admin/profile'
+    | '/_authenticated/admin/settings'
+    | '/_authenticated/admin/users'
+    | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
+  KenaliStrokeRoute: typeof KenaliStrokeRoute
   OnboardingRoute: typeof OnboardingRoute
   AuthLoginRoute: typeof AuthLoginRoute
+  AuthSignupRoute: typeof AuthSignupRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -139,6 +250,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kenali-stroke': {
+      id: '/kenali-stroke'
+      path: '/kenali-stroke'
+      fullPath: '/kenali-stroke'
+      preLoaderRoute: typeof KenaliStrokeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_public': {
@@ -162,6 +280,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRoute
     }
+    '/auth/signup': {
+      id: '/auth/signup'
+      path: '/auth/signup'
+      fullPath: '/auth/signup'
+      preLoaderRoute: typeof AuthSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/login': {
       id: '/auth/login'
       path: '/auth/login'
@@ -169,18 +294,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_public/kenali-stroke': {
-      id: '/_public/kenali-stroke'
-      path: '/kenali-stroke'
-      fullPath: '/kenali-stroke'
-      preLoaderRoute: typeof PublicKenaliStrokeRouteImport
-      parentRoute: typeof PublicRoute
-    }
     '/_authenticated/recovery': {
       id: '/_authenticated/recovery'
       path: '/recovery'
       fullPath: '/recovery'
       preLoaderRoute: typeof AuthenticatedRecoveryRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/not-found': {
+      id: '/_authenticated/not-found'
+      path: '/not-found'
+      fullPath: '/not-found'
+      preLoaderRoute: typeof AuthenticatedNotFoundRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/diagnosa': {
+      id: '/_authenticated/diagnosa'
+      path: '/diagnosa'
+      fullPath: '/diagnosa'
+      preLoaderRoute: typeof AuthenticatedDiagnosaRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/dashboard': {
@@ -197,18 +329,85 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCompanionRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/settings': {
+      id: '/_authenticated/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/profile': {
+      id: '/_authenticated/admin/profile'
+      path: '/profile'
+      fullPath: '/admin/profile'
+      preLoaderRoute: typeof AuthenticatedAdminProfileRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/knowledge': {
+      id: '/_authenticated/admin/knowledge'
+      path: '/knowledge'
+      fullPath: '/admin/knowledge'
+      preLoaderRoute: typeof AuthenticatedAdminKnowledgeRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminKnowledgeRoute: typeof AuthenticatedAdminKnowledgeRoute
+  AuthenticatedAdminProfileRoute: typeof AuthenticatedAdminProfileRoute
+  AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminKnowledgeRoute: AuthenticatedAdminKnowledgeRoute,
+  AuthenticatedAdminProfileRoute: AuthenticatedAdminProfileRoute,
+  AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedCompanionRoute: typeof AuthenticatedCompanionRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDiagnosaRoute: typeof AuthenticatedDiagnosaRoute
+  AuthenticatedNotFoundRoute: typeof AuthenticatedNotFoundRoute
   AuthenticatedRecoveryRoute: typeof AuthenticatedRecoveryRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedCompanionRoute: AuthenticatedCompanionRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDiagnosaRoute: AuthenticatedDiagnosaRoute,
+  AuthenticatedNotFoundRoute: AuthenticatedNotFoundRoute,
   AuthenticatedRecoveryRoute: AuthenticatedRecoveryRoute,
 }
 
@@ -217,12 +416,10 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 )
 
 interface PublicRouteChildren {
-  PublicKenaliStrokeRoute: typeof PublicKenaliStrokeRoute
   PublicIndexRoute: typeof PublicIndexRoute
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
-  PublicKenaliStrokeRoute: PublicKenaliStrokeRoute,
   PublicIndexRoute: PublicIndexRoute,
 }
 
@@ -232,8 +429,10 @@ const PublicRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
+  KenaliStrokeRoute: KenaliStrokeRoute,
   OnboardingRoute: OnboardingRoute,
   AuthLoginRoute: AuthLoginRoute,
+  AuthSignupRoute: AuthSignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

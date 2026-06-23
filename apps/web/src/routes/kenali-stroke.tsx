@@ -1,204 +1,342 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
-import "./kenali-stroke.css";
+import { useGSAP } from "@gsap/react"
+import { Link, createFileRoute } from "@tanstack/react-router"
+import { authClient } from "@web/libs/auth/client"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { useRef } from "react"
+import "./kenali-stroke.css"
 
-export const Route = createFileRoute("/_public/kenali-stroke")({
-  component: KenaliStroke,
-});
+gsap.registerPlugin(useGSAP, ScrollTrigger)
+
+export const Route = createFileRoute("/kenali-stroke")({
+	component: KenaliStroke,
+})
+
+interface Scene {
+	readonly id: number
+	readonly bg: string
+	readonly fg: string
+	readonly accent: string
+	readonly eyebrow: string
+	readonly title: string
+	readonly body: string
+	readonly cta: boolean
+}
+
+const SCENES: readonly Scene[] = [
+	{
+		id: 1,
+		bg: "#f9f6f0",
+		fg: "#1c1917",
+		accent: "#892d32",
+		eyebrow: "Tahap Awal",
+		title: "Stroke sering dimulai dengan gejala yang terlihat ringan.",
+		body: "Seringkali diabaikan karena dianggap kelelahan biasa. Kewaspadaan dini adalah kunci keselamatan.",
+		cta: false,
+	},
+	{
+		id: 2,
+		bg: "#f2ebe1",
+		fg: "#1c1917",
+		accent: "#99452c",
+		eyebrow: "Kognitif",
+		title: "Kesulitan memahami percakapan sederhana.",
+		body: "Otak mulai mengalami disrupsi aliran darah, menghambat pemrosesan bahasa dan logika dasar.",
+		cta: false,
+	},
+	{
+		id: 3,
+		bg: "#ebddd0",
+		fg: "#1c1917",
+		accent: "#735c00",
+		eyebrow: "Artikulasi",
+		title: "Ucapan menjadi tidak jelas atau terdengar pelo.",
+		body: "Otot wajah melemah. Cobalah meminta mereka mengucap kalimat sederhana; perhatikan kejelasan suaranya.",
+		cta: false,
+	},
+	{
+		id: 4,
+		bg: "#e58a67",
+		fg: "#ffffff",
+		accent: "#ffffff",
+		eyebrow: "Motorik Halus",
+		title: "Kesulitan mengangkat satu sisi tubuh.",
+		body: "Kelumpuhan sesaat atau kelemahan drastis pada satu lengan atau kaki merupakan tanda bahaya utama.",
+		cta: false,
+	},
+	{
+		id: 5,
+		bg: "#c85a41",
+		fg: "#ffffff",
+		accent: "#ffffff",
+		eyebrow: "Keseimbangan",
+		title: "Kesulitan berjalan atau koordinasi tubuh menurun.",
+		body: "Sensasi limbung yang tiba-tiba. Dunia seakan berputar, dan langkah kaki menjadi tidak sinkron.",
+		cta: false,
+	},
+	{
+		id: 6,
+		bg: "#8b2621",
+		fg: "#ffffff",
+		accent: "#fde68a",
+		eyebrow: "Golden Hour",
+		title: "Setiap menit sangat berarti.",
+		body: "Penanganan yang terlambat dapat meningkatkan risiko kerusakan permanen pada jaringan otak. Panggil layanan darurat sekarang.",
+		cta: false,
+	},
+	{
+		id: 7,
+		bg: "#4a1513",
+		fg: "#ffffff",
+		accent: "#fde68a",
+		eyebrow: "Bertindak Sekarang",
+		title: "Jangan tunggu gejala memburuk.",
+		body: "Deteksi dini adalah perlindungan terbaik bagi Anda dan orang yang Anda cintai. Gunakan AI kami untuk memantau risiko secara presisi.",
+		cta: true,
+	},
+]
+
+const SCENE_TOTAL_HEIGHT_VH = SCENES.length * 100
 
 function KenaliStroke() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const figureRef = useRef<HTMLDivElement>(null);
-  const headRef = useRef<HTMLDivElement>(null);
-  const torsoRef = useRef<HTMLDivElement>(null);
-  const mouthRef = useRef<HTMLDivElement>(null);
-  const armLRef = useRef<HTMLDivElement>(null);
-  const armRRef = useRef<HTMLDivElement>(null);
-  const legLRef = useRef<HTMLDivElement>(null);
-  const legRRef = useRef<HTMLDivElement>(null);
+	const { data: session } = authClient.useSession()
+	const container = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    document.body.classList.add("kenali-body-transition");
+	useGSAP(
+		() => {
+			const mm = gsap.matchMedia(container)
+			mm.add("(prefers-reduced-motion: no-preference)", () => {
+				const firstScene = SCENES[0]
+				gsap.set(".bg-anim-container", { backgroundColor: firstScene.bg, color: firstScene.fg })
+				gsap.set(".scene-figure", { opacity: 0, scale: 0.92 })
+				gsap.set(".scene-text", { opacity: 0, y: 30 })
+				gsap.set(".figure-0, .text-0", { opacity: 1, scale: 1, y: 0 })
 
-    const observerOptions = { threshold: 0.5 };
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const sceneId = entry.target.getAttribute("data-scene");
-          activateScene(sceneId || "1");
+				SCENES.forEach((_, i) => {
+					ScrollTrigger.create({
+						trigger: `[data-marker="${i + 1}"]`,
+						start: "top center",
+						end: "bottom center",
+						onEnter: () => showScene(i),
+						onEnterBack: () => showScene(i),
+					})
+				})
 
-          const cards = document.querySelectorAll(".editorial-text-card");
-          cards.forEach((card) => card.classList.remove("active"));
-          const targetCard = entry.target.querySelector(".editorial-text-card");
-          if (targetCard) {
-            targetCard.classList.add("active");
-          }
-        }
-      });
-    }, observerOptions);
+				const bgTimeline = gsap.timeline({
+					defaults: { immediateRender: true },
+					scrollTrigger: {
+						trigger: container.current,
+						start: "top top",
+						end: "bottom bottom",
+						scrub: 0.3,
+					},
+				})
+				SCENES.forEach((scene, i) => {
+					bgTimeline.to(
+						".bg-anim-container",
+						{ backgroundColor: scene.bg, color: scene.fg, duration: 1, ease: "none" },
+						i,
+					)
+				})
+			})
 
-    const scenes = document.querySelectorAll(".scene-trigger");
-    scenes.forEach((scene) => observer.observe(scene));
+			// Fallback for reduced motion
+			mm.add("(prefers-reduced-motion: reduce)", () => {
+				const lastScene = SCENES[SCENES.length - 1]
+				gsap.set(".bg-anim-container", { backgroundColor: lastScene.bg, color: lastScene.fg })
+				gsap.set(".scene-figure", { opacity: 1, scale: 1 })
+				gsap.set(".scene-text", { opacity: 1, y: 0 })
+			})
+		},
+		{ scope: container },
+	)
 
-    return () => {
-      document.body.classList.remove("kenali-body-transition");
-      document.body.style.backgroundColor = "";
-      observer.disconnect();
-    };
-  }, []);
+	function showScene(index: number) {
+		gsap.to(".scene-figure", { opacity: 0, scale: 0.92, duration: 0.5, ease: "power2.out", overwrite: "auto" })
+		gsap.to(`.figure-${index}`, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.2)", overwrite: "auto" })
+		gsap.to(".scene-text", { opacity: 0, y: 30, duration: 0.4, ease: "power2.out", overwrite: "auto" })
+		gsap.to(`.text-${index}`, { opacity: 1, y: 0, duration: 0.6, delay: 0.1, ease: "power3.out", overwrite: "auto" })
+	}
 
-  const activateScene = (id: string) => {
-    if (
-      !figureRef.current ||
-      !headRef.current ||
-      !mouthRef.current ||
-      !armLRef.current ||
-      !armRRef.current ||
-      !legLRef.current ||
-      !legRRef.current
-    ) {
-      return;
-    }
+	return (
+		<main ref={container} className="relative bg-transparent" style={{ height: `${SCENE_TOTAL_HEIGHT_VH}vh` }}>
+			<Link
+				to={session ? "/dashboard" : "/"}
+				className="fixed top-5 left-5 z-50 flex items-center gap-2 min-h-11 px-4 py-2 rounded-full bg-black/30 text-white backdrop-blur-md hover:bg-black/50 transition-colors font-label-caps text-label-caps uppercase tracking-widest"
+				aria-label="Kembali"
+			>
+				← Kembali
+			</Link>
+			{SCENES.map((scene, i) => (
+				<div
+					key={scene.id}
+					data-marker={scene.id}
+					className="absolute left-0 w-full"
+					style={{ top: `${i * 100}vh`, height: "100vh" }}
+					aria-hidden="true"
+				/>
+			))}
 
-    figureRef.current.style.transform = "rotate(0deg) translateY(0)";
-    figureRef.current.style.opacity = "1";
-    headRef.current.style.transform = "translateX(-50%) rotate(0deg)";
-    mouthRef.current.style.opacity = "0";
-    mouthRef.current.style.transform = "translateX(-50%) scale(1)";
-    armLRef.current.style.transform = "translateX(-50%) rotate(25deg)";
-    armRRef.current.style.transform = "translateX(-50%) rotate(-25deg)";
-    legLRef.current.style.transform = "translateX(-50%) rotate(15deg)";
-    legRRef.current.style.transform = "translateX(-50%) rotate(-15deg)";
+			<div className="bg-anim-container sticky top-0 h-screen w-full overflow-hidden">
+				<div className="relative h-full w-full">
+					<div className="absolute left-[6%] top-1/2 -translate-y-1/2 w-[36%] max-w-[420px] aspect-[3/4]">
+						{SCENES.map((scene, i) => (
+							<div
+								key={scene.id}
+								className={`scene-figure figure-${i} absolute inset-0 flex items-center justify-center`}
+								style={{ color: scene.fg }}
+							>
+								<SceneFigure variant={i} accent={scene.accent} />
+							</div>
+						))}
+					</div>
 
-    const parts = document.querySelectorAll<HTMLElement>(".stick-part");
-    parts.forEach((p) => {
-      p.style.backgroundColor = "#161d1f";
-    });
-    headRef.current.style.borderColor = "#161d1f";
+					<div className="absolute right-[6%] top-1/2 -translate-y-1/2 w-[44%] max-w-[520px]">
+						{SCENES.map((scene, i) => (
+							<div key={scene.id} className={`scene-text text-${i} absolute inset-0 flex flex-col justify-center`}>
+								<span
+									className="font-label-caps text-label-caps uppercase tracking-widest mb-4"
+									style={{ color: scene.cta ? scene.accent : scene.fg, opacity: scene.cta ? 1 : 0.75 }}
+								>
+									{scene.eyebrow}
+								</span>
+								<h2
+									className="font-headline-lg text-headline-lg md:text-display leading-tight mb-stack-sm"
+									style={{ color: scene.fg }}
+								>
+									{scene.title}
+								</h2>
+								<p
+									className="font-body-md text-body-md leading-relaxed max-w-[440px]"
+									style={{ color: scene.fg, opacity: 0.85 }}
+								>
+									{scene.body}
+								</p>
+								{scene.cta ? (
+									<div className="flex flex-col md:flex-row gap-stack-md mt-stack-md">
+										{session ? (
+											<Link
+												to="/dashboard"
+												className="px-8 py-4 bg-white text-[#4a1513] rounded-full font-headline-md text-headline-md font-bold shadow-xl hover:scale-105 transition-transform text-center"
+											>
+												Kembali ke Dashboard
+											</Link>
+										) : (
+											<Link
+												to="/auth/login"
+												className="px-8 py-4 bg-white text-[#4a1513] rounded-full font-headline-md text-headline-md font-bold shadow-xl hover:scale-105 transition-transform text-center"
+											>
+												Pelajari Risiko Anda (Login)
+											</Link>
+										)}
+										<button
+											type="button"
+											className="px-8 py-4 border-2 border-white/40 text-white rounded-full font-headline-md text-headline-md font-medium hover:bg-white/10 transition-colors"
+										>
+											Hubungi Layanan Darurat
+										</button>
+									</div>
+								) : null}
+							</div>
+						))}
+					</div>
 
-    switch (id) {
-      case "1":
-        document.body.style.backgroundColor = "#f4fafd";
-        break;
-      case "2":
-        document.body.style.backgroundColor = "#e8eff1";
-        headRef.current.style.transform = "translateX(-50%) rotate(15deg)";
-        armRRef.current.style.transform = "translateX(-50%) rotate(-140deg) translateY(10px)";
-        break;
-      case "3":
-        document.body.style.backgroundColor = "#dde4e6";
-        mouthRef.current.style.opacity = "1";
-        mouthRef.current.style.height = "6px";
-        mouthRef.current.style.borderRadius = "50%";
-        mouthRef.current.style.transform = "translateX(-50%) skewX(20deg)";
-        headRef.current.style.transform = "translateX(-50%) rotate(-5deg)";
-        break;
-      case "4":
-        document.body.style.backgroundColor = "#d4dbdd";
-        armRRef.current.style.transform = "translateX(-50%) rotate(5deg)";
-        armLRef.current.style.transform = "translateX(-50%) rotate(45deg)";
-        figureRef.current.style.transform = "rotate(2deg)";
-        break;
-      case "5":
-        document.body.style.backgroundColor = "#c8ced0";
-        figureRef.current.style.transform = "rotate(-12deg) translateX(-15px)";
-        legLRef.current.style.transform = "translateX(-50%) rotate(45deg)";
-        legRRef.current.style.transform = "translateX(-50%) rotate(-10deg)";
-        armLRef.current.style.transform = "translateX(-50%) rotate(-60deg)";
-        break;
-      case "6":
-        document.body.style.backgroundColor = "#ba1a1a";
-        parts.forEach((p) => {
-          p.style.backgroundColor = "#ffffff";
-        });
-        headRef.current.style.borderColor = "#ffffff";
-        figureRef.current.style.transform = "translateY(160px) rotate(-90deg)";
-        armLRef.current.style.transform = "translateX(-50%) rotate(10deg)";
-        armRRef.current.style.transform = "translateX(-50%) rotate(-10deg)";
-        break;
-      case "7":
-        figureRef.current.style.opacity = "0";
-        break;
-    }
-  };
+					<div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 pointer-events-none">
+						<div className="w-px h-12 bg-current opacity-30 overflow-hidden">
+							<div className="w-full h-1/2 bg-current animate-[scrollPulse_1.8s_ease-in-out_infinite]" />
+						</div>
+						<span className="font-label-caps text-label-caps uppercase tracking-widest opacity-60">
+							Gulir untuk melanjutkan
+						</span>
+					</div>
+				</div>
+			</div>
+		</main>
+	)
+}
 
-  return (
-    <main className="relative overflow-x-hidden" ref={containerRef}>
-      <div className="sticky-character-container pointer-events-none z-0">
-        <div className="stick-figure" ref={figureRef}>
-          <div className="stick-part stick-head" ref={headRef}>
-            <div className="stick-mouth" ref={mouthRef} />
-          </div>
-          <div className="stick-part stick-torso" ref={torsoRef} />
-          <div className="stick-part stick-arm" ref={armLRef} style={{ transform: "translateX(-50%) rotate(25deg)" }} />
-          <div className="stick-part stick-arm" ref={armRRef} style={{ transform: "translateX(-50%) rotate(-25deg)" }} />
-          <div className="stick-part stick-leg" ref={legLRef} style={{ transform: "translateX(-50%) rotate(15deg)" }} />
-          <div className="stick-part stick-leg" ref={legRRef} style={{ transform: "translateX(-50%) rotate(-15deg)" }} />
-        </div>
-      </div>
+interface SceneFigureProps {
+	variant: number
+	accent: string
+}
 
-      <section className="scene-trigger" data-scene="1">
-        <div className="editorial-text-card bg-surface/40 backdrop-blur-sm p-stack-md rounded-xl border border-outline-variant/20 shadow-sm active">
-          <span className="font-label-caps text-label-caps text-secondary mb-unit block">TAHAP AWAL</span>
-          <h2 className="font-headline-lg text-headline-lg text-on-surface mb-stack-sm leading-tight">Stroke sering dimulai dengan gejala yang terlihat ringan</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant">Seringkali diabaikan karena dianggap kelelahan biasa. Kewaspadaan dini adalah kunci keselamatan.</p>
-        </div>
-      </section>
+function SceneFigure({ variant, accent }: SceneFigureProps) {
+	const stroke = variant >= 4 ? "#ffffff" : "#161d1f"
+	const baseProps = {
+		viewBox: "0 0 100 150",
+		fill: "none" as const,
+		stroke,
+		strokeWidth: 3,
+		strokeLinecap: "round" as const,
+		strokeLinejoin: "round" as const,
+		className: "w-full h-full",
+	}
 
-      <section className="scene-trigger" data-scene="2">
-        <div className="editorial-text-card bg-surface/40 backdrop-blur-sm p-stack-md rounded-xl border border-outline-variant/20 shadow-sm">
-          <span className="font-label-caps text-label-caps text-secondary mb-unit block">KOGNITIF</span>
-          <h2 className="font-headline-lg text-headline-lg text-on-surface mb-stack-sm leading-tight">Kesulitan memahami percakapan sederhana</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant">Otak mulai mengalami disrupsi aliran darah, menghambat pemrosesan bahasa dan logika dasar.</p>
-        </div>
-      </section>
-
-      <section className="scene-trigger" data-scene="3">
-        <div className="editorial-text-card bg-surface/40 backdrop-blur-sm p-stack-md rounded-xl border border-outline-variant/20 shadow-sm">
-          <span className="font-label-caps text-label-caps text-secondary mb-unit block">ARTIKULASI</span>
-          <h2 className="font-headline-lg text-headline-lg text-on-surface mb-stack-sm leading-tight">Ucapan menjadi tidak jelas atau terdengar pelo</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant">Otot wajah melemah. Cobalah meminta mereka mengucap kalimat sederhana; perhatikan kejelasan suaranya.</p>
-        </div>
-      </section>
-
-      <section className="scene-trigger" data-scene="4">
-        <div className="editorial-text-card bg-surface/40 backdrop-blur-sm p-stack-md rounded-xl border border-outline-variant/20 shadow-sm">
-          <span className="font-label-caps text-label-caps text-secondary mb-unit block">MOTORIK HALUS</span>
-          <h2 className="font-headline-lg text-headline-lg text-on-surface mb-stack-sm leading-tight">Kesulitan mengangkat satu sisi tubuh</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant">Kelumpuhan sesaat atau kelemahan drastis pada satu lengan atau kaki merupakan tanda bahaya utama.</p>
-        </div>
-      </section>
-
-      <section className="scene-trigger" data-scene="5">
-        <div className="editorial-text-card bg-surface/40 backdrop-blur-sm p-stack-md rounded-xl border border-outline-variant/20 shadow-sm">
-          <span className="font-label-caps text-label-caps text-secondary mb-unit block">KESEIMBANGAN</span>
-          <h2 className="font-headline-lg text-headline-lg text-on-surface mb-stack-sm leading-tight">Kesulitan berjalan atau koordinasi tubuh menurun</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant">Sensasi limbung yang tiba-tiba. Dunia seakan berputar, dan langkah kaki menjadi tidak sinkron.</p>
-        </div>
-      </section>
-
-      <section className="scene-trigger" data-scene="6">
-        <div className="editorial-text-card bg-surface-container-highest/90 p-stack-md rounded-xl border border-primary/20 shadow-lg">
-          <span className="font-label-caps text-label-caps text-primary font-bold mb-unit block">GOLDEN HOUR</span>
-          <h2 className="font-headline-lg text-headline-lg text-on-surface mb-stack-sm leading-tight">Setiap menit sangat berarti.</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant">Penanganan yang terlambat dapat meningkatkan risiko kerusakan permanen pada jaringan otak.</p>
-        </div>
-      </section>
-
-      <section className="min-h-screen flex items-center justify-center bg-primary text-on-primary text-center px-gutter relative z-20 scene-trigger" data-scene="7">
-        <div className="max-w-[800px] animate-fade-up">
-          <h1 className="font-display text-display mb-stack-md">Jangan tunggu gejala memburuk</h1>
-          <p className="font-body-lg text-body-lg mb-section-gap opacity-90">Deteksi dini adalah perlindungan terbaik bagi Anda dan orang yang Anda cintai. Gunakan AI kami untuk memantau risiko secara presisi.</p>
-          <div className="flex flex-col md:flex-row gap-stack-md justify-center">
-            <button className="px-10 py-4 bg-on-primary text-primary rounded-full font-headline-md text-headline-md font-bold shadow-xl hover:scale-105 transition-transform">
-              Pelajari Risiko Anda
-            </button>
-            <button className="px-10 py-4 border border-on-primary/30 text-on-primary rounded-full font-headline-md text-headline-md font-medium hover:bg-on-primary/10 transition-colors">
-              Hubungi Layanan Darurat
-            </button>
-          </div>
-        </div>
-      </section>
-    </main>
-  );
+	switch (variant) {
+		case 0:
+			return (
+				<svg {...baseProps} aria-hidden="true">
+					<circle cx="50" cy="30" r="12" />
+					<path d="M50 42 L50 90 M50 50 L30 80 M50 50 L70 80 M50 90 L35 140 M50 90 L65 140" />
+				</svg>
+			)
+		case 1:
+			return (
+				<svg {...baseProps} aria-hidden="true">
+					<circle cx="45" cy="32" r="12" />
+					<path d="M45 44 L50 90 M50 50 L32 72 M50 50 L72 60 M72 60 L82 45 M50 90 L35 140 M50 90 L65 140" />
+					<path d="M82 12 C 92 8, 96 22, 86 32 C 80 36, 80 42, 80 42" stroke={accent} />
+					<circle cx="86" cy="52" r="2.5" fill={accent} stroke="none" />
+				</svg>
+			)
+		case 2:
+			return (
+				<svg {...baseProps} aria-hidden="true">
+					<circle cx="50" cy="30" r="12" />
+					<path d="M50 42 L50 90 M50 50 L30 80 M50 50 L70 80 M50 90 L35 140 M50 90 L65 140" />
+					<path d="M62 30 Q 72 18 82 28 T 96 22" strokeWidth={2} opacity={0.7} />
+					<path d="M60 38 Q 72 34 78 44 T 92 42" strokeWidth={2} opacity={0.7} />
+					<path d="M58 24 Q 68 14 78 22" strokeWidth={2} opacity={0.5} />
+				</svg>
+			)
+		case 3:
+			return (
+				<svg {...baseProps} aria-hidden="true">
+					<circle cx="50" cy="30" r="12" />
+					<path d="M50 42 L50 90 M50 50 L30 80 M50 50 L62 92 M50 90 L35 140 M50 90 L65 140" />
+					<path d="M68 88 L68 110 M63 105 L68 110 L73 105" stroke={accent} strokeWidth={2.5} />
+					<circle cx="68" cy="118" r="1.5" fill={accent} stroke="none" />
+				</svg>
+			)
+		case 4:
+			return (
+				<svg {...baseProps} aria-hidden="true">
+					<circle cx="58" cy="35" r="12" />
+					<path d="M58 47 L45 92 M48 55 L26 76 M48 55 L76 82 M45 92 L40 138 M45 92 L70 128" />
+					<path d="M18 122 Q 30 142 52 146" strokeWidth={2} strokeDasharray="4 4" opacity={0.7} />
+					<path d="M82 60 L82 78" stroke={accent} strokeWidth={3} />
+				</svg>
+			)
+		case 5:
+			return (
+				<svg {...baseProps} aria-hidden="true">
+					<circle cx="65" cy="40" r="12" />
+					<path d="M65 52 L40 95 M50 60 L20 70 M50 60 L82 92 M40 95 L30 140 M40 95 L65 130" />
+					<path d="M88 8 L88 30 M86 36 L90 36" stroke={accent} strokeWidth={4} />
+					<path d="M12 22 L24 36 M8 46 L14 50" stroke={accent} strokeWidth={3} opacity={0.8} />
+					<circle cx="88" cy="42" r="3" fill={accent} stroke="none" />
+				</svg>
+			)
+		case 6:
+			return (
+				<svg {...baseProps} aria-hidden="true">
+					<circle cx="35" cy="82" r="12" />
+					<path d="M35 94 L35 130 M35 102 L15 122 M35 102 L55 122 M35 130 L62 130 M62 130 L82 140" />
+					<path d="M8 146 L92 146" stroke={stroke} strokeWidth={2} opacity={0.4} />
+					<path d="M55 70 L55 86 M52 82 L55 86 L58 82" stroke={accent} strokeWidth={2.5} />
+				</svg>
+			)
+		default:
+			return null
+	}
 }
