@@ -1,8 +1,8 @@
-import type { Session } from "../../domain/session/session.ts";
-import type { UseCases } from "../../application/use-cases.ts";
+import type { UseCases } from "@api/application/use-cases"
+import type { Session } from "@api/domain/session/session"
 
 export interface ORPCContext {
-  headers: Headers;
-  session: Session | null;
-  useCases: UseCases;
+	headers: Headers
+	session: Session | null
+	useCases: UseCases
 }

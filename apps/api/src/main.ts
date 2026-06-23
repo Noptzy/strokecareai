@@ -1,59 +1,121 @@
-import { serve } from "@hono/node-server";
-import { Hono } from "hono";
-import { env } from "./infrastructure/config/env.ts";
-import { createDb } from "./infrastructure/db/client.ts";
-import { buildAuth } from "./infrastructure/auth/better-auth.ts";
-import { createRedisCache } from "./infrastructure/cache/redis.ts";
-import { buildUseCases } from "./application/use-cases.ts";
-import { buildRouter } from "./presentation/routers/index.ts";
-import { RPCHandler } from "@orpc/server/fetch";
-import { cors } from "hono/cors";
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
+import { buildUseCases } from "@api/application/use-cases"
+import type { Session } from "@api/domain/session/session"
+import { buildAuth } from "@api/infrastructure/auth/better-auth"
+import { createRedisCache } from "@api/infrastructure/cache/redis"
+import { env } from "@api/infrastructure/config/env"
+import { createDb } from "@api/infrastructure/db/client"
+import { DrizzleCompanionRepository } from "@api/infrastructure/db/repos/companion-repo-drizzle"
+import { DrizzleProfileRepository } from "@api/infrastructure/db/repos/profile-repo-drizzle"
+import { DrizzleSettingsRepository } from "@api/infrastructure/db/repos/settings-repo-drizzle"
+import { DrizzleUserRepository } from "@api/infrastructure/db/repos/user-repo-drizzle"
+import { createOpenRouterClient } from "@api/infrastructure/openrouter/client"
+import { buildRouter } from "@api/presentation/routers/index"
+import { serve } from "@hono/node-server"
+import { serveStatic } from "@hono/node-server/serve-static"
+import { RPCHandler } from "@orpc/server/fetch"
+import { Hono } from "hono"
+import { cors } from "hono/cors"
 
 async function main() {
-  const db = createDb(env.DATABASE_URL);
-  const cache = createRedisCache(env.REDIS_URL);
-  
-  const auth = buildAuth({ 
-    db, 
-    secret: env.BETTER_AUTH_SECRET, 
-    url: env.BETTER_AUTH_URL 
-  });
+	const db = createDb(env.DATABASE_URL)
+	const cache = createRedisCache(env.REDIS_URL)
 
-  const authService = {
-    async banUser(userId: string, banReason?: string, ctx?: { headers: Headers }) {
-      await auth.api.banUser({ body: { userId, banReason }, headers: ctx?.headers });
-    }
-  };
+	const auth = buildAuth({
+		db,
+		secret: env.BETTER_AUTH_SECRET,
+		url: env.BETTER_AUTH_URL,
+		trustedOrigins: [env.WEB_ORIGIN, env.BETTER_AUTH_URL],
+	})
 
-  const useCases = buildUseCases({ auth: authService, cache, userRepo: {} as any }); // mock userRepo for now
-  const appRouter = buildRouter(useCases);
+	const authService = {
+		async banUser(userId: string, banReason?: string, ctx?: { headers: Headers }) {
+			await auth.api.banUser({ body: { userId, banReason }, headers: ctx?.headers })
+		},
+	}
 
-  const app = new Hono();
-  
-  app.use("*", cors({ origin: env.WEB_ORIGIN, credentials: true }));
-  
-  app.get("/healthz", (c) => c.text("ok"));
+	const profileRepo = new DrizzleProfileRepository(db)
+	const companionRepo = new DrizzleCompanionRepository(db)
+	const settingsRepo = new DrizzleSettingsRepository(db)
+	const userRepo = new DrizzleUserRepository(db)
+	const openRouter = createOpenRouterClient(env.OPENROUTER_API_KEY)
 
-  app.all("/api/auth/*", (c) => auth.handler(c.req.raw));
+	const useCases = buildUseCases({
+		auth: authService,
+		cache,
+		userRepo,
+		profileRepo,
+		companionRepo,
+		settingsRepo,
+		openRouter,
+	})
+	const appRouter = buildRouter(useCases)
 
-  const rpcHandler = new RPCHandler(appRouter);
-  app.all("/rpc/*", async (c) => {
-    const session = await auth.api.getSession({ headers: c.req.raw.headers });
-    return rpcHandler.fetch(c.req.raw, {
-      context: {
-        headers: c.req.raw.headers,
-        session: session ? { ...session.session, user: session.user as any } : null,
-        useCases
-      }
-    });
-  });
+	const app = new Hono()
 
-  serve({
-    fetch: app.fetch,
-    port: env.PORT,
-  }, (info) => {
-    console.log(`Server is running on http://localhost:${info.port}`);
-  });
+	app.use("*", cors({ origin: env.WEB_ORIGIN, credentials: true }))
+
+	app.get("/healthz", (c) => c.text("ok"))
+
+	app.all("/api/auth/*", (c) => auth.handler(c.req.raw))
+
+	const rpcHandler = new RPCHandler(appRouter)
+	app.all("/rpc/*", async (c) => {
+		const session = await auth.api.getSession({ headers: c.req.raw.headers })
+		const rpcSession: Session | null = session
+			? {
+					id: session.session.id,
+					userId: session.session.userId,
+					expiresAt: session.session.expiresAt,
+					user: {
+						id: session.user.id,
+						name: session.user.name,
+						email: session.user.email,
+						role: (session.user.role ?? "user") as "admin" | "user",
+						banned: false,
+						createdAt: new Date(),
+					},
+				}
+			: null
+		const result = await rpcHandler.handle(c.req.raw, {
+			prefix: "/rpc",
+			context: {
+				headers: c.req.raw.headers,
+				session: rpcSession,
+				useCases,
+			},
+		})
+		if (result.matched) {
+			return new Response(result.response.body, {
+				status: result.response.status,
+				headers: result.response.headers,
+			})
+		}
+		return c.notFound()
+	})
+
+	if (env.WEB_DIST_PATH) {
+		app.use("/*", serveStatic({ root: env.WEB_DIST_PATH }))
+		app.get("*", (c) => {
+			try {
+				const indexHtml = readFileSync(join(env.WEB_DIST_PATH!, "index.html"), "utf-8")
+				return c.html(indexHtml)
+			} catch (err) {
+				return c.notFound()
+			}
+		})
+	}
+
+	serve(
+		{
+			fetch: app.fetch,
+			port: env.PORT,
+		},
+		(info) => {
+			console.log(`Server is running on http://localhost:${info.port}`)
+		},
+	)
 }
 
-main().catch(console.error);
+main().catch(console.error)

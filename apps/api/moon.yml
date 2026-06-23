@@ -8,5 +8,3 @@ fileGroups:
     - 'src/**/*'
     - 'package.json'
 
-tasks:
-

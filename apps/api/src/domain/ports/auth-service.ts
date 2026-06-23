@@ -1,3 +1,3 @@
 export interface AuthService {
-  banUser(userId: string, banReason?: string, ctx?: { headers: Headers }): Promise<void>;
+	banUser(userId: string, banReason?: string, ctx?: { headers: Headers }): Promise<void>
 }
