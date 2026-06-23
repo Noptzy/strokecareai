@@ -1,0 +1,95 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1782134419573,
+  "projectRoot": "D:\\Kuliah\\Semester 6\\kecerdasan buatan\\strokecareAi",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      }
+    ],
+    "frameworks": [],
+    "packageManager": "pnpm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "pnpm build",
+    "testCommand": "pnpm test",
+    "lintCommand": "pnpm lint",
+    "devCommand": "pnpm dev",
+    "scripts": {
+      "dev": "moon run :dev",
+      "build": "moon run :build",
+      "lint": "moon run :lint",
+      "format": "moon run :format",
+      "check": "moon run :check",
+      "test": "moon run :test",
+      "db:push": "moon run api:db-push",
+      "db:generate": "moon run api:db-generate"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": true,
+    "workspaces": [],
+    "mainDirectories": [
+      "assets",
+      "scripts"
+    ],
+    "gitBranches": {
+      "defaultBranch": "development",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "apps": {
+      "path": "apps",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1782134419494,
+      "keyFiles": []
+    },
+    "assets": {
+      "path": "assets",
+      "purpose": "Static assets",
+      "fileCount": 1,
+      "lastAccessed": 1782134419494,
+      "keyFiles": [
+        "logo.png"
+      ]
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 1,
+      "lastAccessed": 1782134419495,
+      "keyFiles": [
+        "setup-windows.ps1"
+      ]
+    },
+    "apps\\api": {
+      "path": "apps\\api",
+      "purpose": "API routes",
+      "fileCount": 6,
+      "lastAccessed": 1782134419496,
+      "keyFiles": [
+        "drizzle.config.ts",
+        "moon.yml",
+        "package.json"
+      ]
+    }
+  },
+  "hotPaths": [],
+  "userDirectives": []
+}

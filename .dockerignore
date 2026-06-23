@@ -1,0 +1,25 @@
+# Docker / runtime
+.env
+.env.*
+**/node_modules
+**/dist
+**/.turbo
+**/.cache
+
+# Build artifacts
+*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*

@@ -10,14 +10,13 @@ fileGroups:
 
 tasks:
   check:
-    command: 'tsc --noEmit'
+    command: 'biome check .'
     inputs:
       - '@globs(sources)'
-      - 'tsconfig.json'
-      - '/tsconfig.base.json'
-  
+      - '/biome.json'
+   
   lint:
-    command: 'biome check .'
+    command: 'biome lint .'
     inputs:
       - '@globs(sources)'
       - '/biome.json'
