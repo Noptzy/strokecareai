@@ -32,7 +32,13 @@ export function buildUseCases(deps: Dependencies) {
 			cache: deps.cache,
 		}),
 		settings: makeSettings({ repo: deps.settingsRepo }),
-		admin: makeAdmin({ auth: deps.auth, userRepo: deps.userRepo, profileRepo: deps.profileRepo }),
+		admin: makeAdmin({
+			auth: deps.auth,
+			userRepo: deps.userRepo,
+			profileRepo: deps.profileRepo,
+			companionRepo: deps.companionRepo,
+			settingsRepo: deps.settingsRepo,
+		}),
 		risk: makeRisk({ profileRepo: deps.profileRepo }),
 	}
 }

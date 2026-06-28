@@ -1,12 +1,16 @@
 import type { AuthedContext } from "@api/application/shared/context"
 import { badRequest, forbidden, notFound } from "@api/application/shared/errors"
+import type { CompanionRepository } from "@api/domain/companion/companion-repository"
 import type { AuthService } from "@api/domain/ports/auth-service"
 import type { ProfileRepository } from "@api/domain/profile/profile-repository"
 import { assessRisk } from "@api/domain/risk/risk"
+import type { SettingsRepository } from "@api/domain/settings/settings-repository"
 import type { UserRepository } from "@api/domain/user/user-repository"
 import { z } from "zod"
 
 const USER_ROLE_VALUES = ["admin", "user"] as const
+const ADMIN_GROWTH_DAYS = 7
+const ADMIN_RECENT_ACTIVITY_LIMIT = 5
 
 export const createAdminUserInput = z.object({
 	name: z.string().min(2).max(80),
@@ -34,11 +38,27 @@ export type DeleteAdminUserInput = z.infer<typeof deleteAdminUserInput>
 
 export interface AdminDashboardData {
 	totalUsers: number
+	totalChatSessions: number
+	totalAiMessages: number
 	riskTiers: {
 		low: number
 		medium: number
 		high: number
 	}
+	settings: {
+		modelId: string
+		hasKnowledgeBase: boolean
+		hasSystemPromptOverride: boolean
+	}
+	weeklyUserGrowth: Array<{
+		date: string
+		count: number
+	}>
+	recentActivity: Array<{
+		type: "user_registered"
+		title: string
+		occurredAt: Date
+	}>
 	users: Array<{
 		id: string
 		name: string
@@ -62,8 +82,10 @@ export function makeAdmin(deps: {
 	auth: AuthService
 	userRepo: UserRepository
 	profileRepo: ProfileRepository
+	companionRepo: CompanionRepository
+	settingsRepo: SettingsRepository
 }): AdminUseCases {
-	const { auth, userRepo, profileRepo } = deps
+	const { auth, userRepo, profileRepo, companionRepo, settingsRepo } = deps
 	const assertAdmin = (ctx: AuthedContext) => {
 		if (ctx.session.user.role !== "admin") {
 			throw forbidden("admin only")
@@ -74,11 +96,26 @@ export function makeAdmin(deps: {
 		async getDashboard(ctx) {
 			assertAdmin(ctx)
 
-			const [users, profiles] = await Promise.all([userRepo.list(), profileRepo.listAllProfiles()])
+			const [users, profiles, totalChatSessions, totalAiMessages, settings] = await Promise.all([
+				userRepo.list(),
+				profileRepo.listAllProfiles(),
+				companionRepo.countSessions(),
+				companionRepo.countMessages(),
+				settingsRepo.getSettings(),
+			])
 
 			const dashboard: AdminDashboardData = {
 				totalUsers: users.length,
+				totalChatSessions,
+				totalAiMessages,
 				riskTiers: { low: 0, medium: 0, high: 0 },
+				settings: {
+					modelId: settings.modelId,
+					hasKnowledgeBase: Boolean(settings.knowledgeBase?.trim()),
+					hasSystemPromptOverride: Boolean(settings.systemPromptOverride?.trim()),
+				},
+				weeklyUserGrowth: getWeeklyUserGrowth(users),
+				recentActivity: getRecentActivity(users),
 				users: [],
 			}
 
@@ -158,4 +195,37 @@ export function makeAdmin(deps: {
 			return { success: true as const }
 		},
 	}
+}
+
+function getDateKey(date: Date): string {
+	return date.toISOString().slice(0, 10)
+}
+
+function getWeeklyUserGrowth(
+	users: Awaited<ReturnType<UserRepository["list"]>>,
+): AdminDashboardData["weeklyUserGrowth"] {
+	const today = new Date()
+	const days = Array.from({ length: ADMIN_GROWTH_DAYS }, (_, index) => {
+		const date = new Date(today)
+		date.setHours(0, 0, 0, 0)
+		date.setDate(date.getDate() - (ADMIN_GROWTH_DAYS - 1 - index))
+		return date
+	})
+
+	return days.map((date) => {
+		const dateKey = getDateKey(date)
+		const count = users.filter((user) => getDateKey(user.createdAt) === dateKey).length
+		return { date: dateKey, count }
+	})
+}
+
+function getRecentActivity(users: Awaited<ReturnType<UserRepository["list"]>>): AdminDashboardData["recentActivity"] {
+	return [...users]
+		.sort((leftUser, rightUser) => rightUser.createdAt.getTime() - leftUser.createdAt.getTime())
+		.slice(0, ADMIN_RECENT_ACTIVITY_LIMIT)
+		.map((user) => ({
+			type: "user_registered",
+			title: `${user.name} terdaftar`,
+			occurredAt: user.createdAt,
+		}))
 }

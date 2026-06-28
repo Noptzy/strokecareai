@@ -1,5 +1,5 @@
 import type { AuthedContext } from "@api/application/shared/context"
-import { badRequest, forbidden, notFound } from "@api/application/shared/errors"
+import { badRequest, forbidden } from "@api/application/shared/errors"
 import { makeAdmin } from "@api/application/use-cases/admin"
 import { makeCompanion } from "@api/application/use-cases/companion"
 import { makeProfile } from "@api/application/use-cases/profile"
@@ -31,11 +31,10 @@ function authed(userId = "u1"): AuthedContext {
 }
 
 describe("makeProfile", () => {
-	it("throws notFound when profile missing", async () => {
-		const errCtor = notFound("x").constructor
+	it("returns null when profile missing", async () => {
 		const repo = { findByUserId: async () => null, upsert: async () => ({}) as Profile }
 		const profile = makeProfile({ repo, cache: mockCache })
-		await expect(profile.getProfile(authed())).rejects.toBeInstanceOf(errCtor)
+		await expect(profile.getProfile(authed())).resolves.toBeNull()
 	})
 
 	it("returns cached profile without hitting repo", async () => {
@@ -226,9 +225,9 @@ describe("makeAdmin", () => {
 	it("lists users and calculates risk metrics correctly", async () => {
 		const userRepo = {
 			list: async () => [
-				{ id: "u1", name: "Admin", role: "admin" },
-				{ id: "u2", name: "User1", role: "user" },
-				{ id: "u3", name: "User2", role: "user" },
+				{ id: "u1", name: "Admin", email: "admin@test.dev", role: "admin", banned: false, createdAt: new Date() },
+				{ id: "u2", name: "User1", email: "user1@test.dev", role: "user", banned: false, createdAt: new Date() },
+				{ id: "u3", name: "User2", email: "user2@test.dev", role: "user", banned: false, createdAt: new Date() },
 			],
 			findById: async () => null,
 		}
@@ -244,24 +243,50 @@ describe("makeAdmin", () => {
 			],
 			upsert: async () => null as any,
 		}
+		const companionRepo = {
+			countSessions: async () => 2,
+			countMessages: async () => 4,
+		}
+		const settingsRepo = {
+			getSettings: async () => ({
+				openrouterApiKey: null,
+				modelId: "google/gemini-2.5-flash",
+				knowledgeBase: "kb",
+				systemPromptOverride: null,
+			}),
+		}
 
 		const adminAuth = authed()
 		adminAuth.session!.user.role = "admin"
 
-		const admin = makeAdmin({ userRepo: userRepo as any, profileRepo: profileRepo as any })
+		const admin = makeAdmin({
+			auth: {} as any,
+			userRepo: userRepo as any,
+			profileRepo: profileRepo as any,
+			companionRepo: companionRepo as any,
+			settingsRepo: settingsRepo as any,
+		})
 		const dashboard = await admin.getDashboard(adminAuth)
 
 		expect(dashboard.totalUsers).toBe(3)
-		// User1 has 3 risks (high), User2 has 1 risk (low)
 		expect(dashboard.riskTiers.high).toBe(1)
 		expect(dashboard.riskTiers.low).toBe(1)
+		expect(dashboard.totalChatSessions).toBe(2)
+		expect(dashboard.totalAiMessages).toBe(4)
+		expect(dashboard.settings.hasKnowledgeBase).toBe(true)
 		expect(dashboard.users.find((u) => u.id === "u2")?.riskTier).toBe("high")
 		expect(dashboard.users.find((u) => u.id === "u3")?.riskTier).toBe("low")
 	})
 
 	it("throws forbidden if non-admin accesses dashboard", async () => {
 		const errCtor = forbidden("x").constructor
-		const admin = makeAdmin({ userRepo: {} as any, profileRepo: {} as any })
+		const admin = makeAdmin({
+			auth: {} as any,
+			userRepo: {} as any,
+			profileRepo: {} as any,
+			companionRepo: {} as any,
+			settingsRepo: {} as any,
+		})
 		const normalUserAuth = authed()
 		normalUserAuth.session!.user.role = "user"
 

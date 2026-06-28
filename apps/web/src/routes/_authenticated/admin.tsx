@@ -58,9 +58,7 @@ const NAV_SECTIONS: NavSection[] = [
 	},
 	{
 		label: "Account",
-		items: [
-			{ to: "/admin/profile", label: "Admin Profile", icon: "account_circle" },
-		],
+		items: [{ to: "/admin/profile", label: "Admin Profile", icon: "account_circle" }],
 	},
 ]
 
@@ -154,8 +152,15 @@ function AdminLayout() {
 								const isActive = isItemActive(item.to, currentPath)
 								const isDisabled = item.badge === "Soon"
 								return isDisabled ? (
-									<div key={item.to} className="admin-nav-item" style={{ opacity: 0.45, cursor: "not-allowed" }} title="Coming soon">
-										<span className="material-symbols-outlined" aria-hidden="true">{item.icon}</span>
+									<div
+										key={item.to}
+										className="admin-nav-item"
+										style={{ opacity: 0.45, cursor: "not-allowed" }}
+										title="Coming soon"
+									>
+										<span className="material-symbols-outlined" aria-hidden="true">
+											{item.icon}
+										</span>
 										<span className="admin-nav-item-label">{item.label}</span>
 										{item.badge && <span className="admin-nav-badge">{item.badge}</span>}
 									</div>
@@ -163,10 +168,13 @@ function AdminLayout() {
 									<Link
 										key={item.to}
 										to={item.to}
+										activeOptions={{ exact: true }}
 										className={`admin-nav-item ${isActive ? "active" : ""}`}
 										onClick={closeMobile}
 									>
-										<span className="material-symbols-outlined" aria-hidden="true">{item.icon}</span>
+										<span className="material-symbols-outlined" aria-hidden="true">
+											{item.icon}
+										</span>
 										<span className="admin-nav-item-label">{item.label}</span>
 									</Link>
 								)
@@ -193,7 +201,9 @@ function AdminLayout() {
 						aria-label="Logout"
 						title="Logout"
 					>
-						<span className="material-symbols-outlined" aria-hidden="true">logout</span>
+						<span className="material-symbols-outlined" aria-hidden="true">
+							logout
+						</span>
 					</button>
 				</div>
 			</aside>
@@ -207,7 +217,9 @@ function AdminLayout() {
 							onClick={() => setMobileOpen(true)}
 							aria-label="Buka menu"
 						>
-							<span className="material-symbols-outlined" aria-hidden="true">menu</span>
+							<span className="material-symbols-outlined" aria-hidden="true">
+								menu
+							</span>
 						</button>
 						<div className="admin-topbar-title">
 							<h1>{meta.title}</h1>
@@ -221,7 +233,9 @@ function AdminLayout() {
 							onClick={() => navigate({ to: "/" })}
 							title="Lihat sebagai user"
 						>
-							<span className="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+							<span className="material-symbols-outlined" aria-hidden="true">
+								open_in_new
+							</span>
 							View Site
 						</button>
 					</div>

@@ -3,6 +3,8 @@ import type { CompanionSession } from "@api/domain/companion/companion-session"
 
 export interface CompanionRepository {
 	listByUserId(userId: string, limit: number): Promise<CompanionSession[]>
+	countSessions(): Promise<number>
+	countMessages(): Promise<number>
 	createSession(userId: string, title: string): Promise<CompanionSession>
 	getSession(sessionId: string, userId: string): Promise<CompanionSession | null>
 	updateTitle(sessionId: string, userId: string, title: string): Promise<CompanionSession>

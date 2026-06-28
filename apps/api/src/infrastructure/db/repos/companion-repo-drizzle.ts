@@ -4,7 +4,7 @@ import type { CompanionRepository } from "@api/domain/companion/companion-reposi
 import type { CompanionSession } from "@api/domain/companion/companion-session"
 import type { Database } from "@api/infrastructure/db/client"
 import { companionMessage, companionSession } from "@api/infrastructure/db/schema"
-import { and, desc, eq } from "drizzle-orm"
+import { and, count, desc, eq } from "drizzle-orm"
 
 function toSession(row: typeof companionSession.$inferSelect): CompanionSession {
 	return {
@@ -36,6 +36,16 @@ export class DrizzleCompanionRepository implements CompanionRepository {
 			.orderBy(desc(companionSession.createdAt))
 			.limit(limit)
 		return rows.map(toSession)
+	}
+
+	async countSessions(): Promise<number> {
+		const [row] = await this.db.select({ value: count() }).from(companionSession)
+		return row?.value ?? 0
+	}
+
+	async countMessages(): Promise<number> {
+		const [row] = await this.db.select({ value: count() }).from(companionMessage)
+		return row?.value ?? 0
 	}
 
 	async createSession(userId: string, title: string): Promise<CompanionSession> {

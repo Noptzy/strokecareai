@@ -1,22 +1,28 @@
 import { useGSAP } from "@gsap/react"
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { Link, createFileRoute } from "@tanstack/react-router"
+import { useAdminDashboard } from "@web/hooks/use-admin-dashboard"
 import gsap from "gsap"
 import { useRef } from "react"
-import { useAdminDashboard } from "@web/hooks/use-admin-dashboard"
 
 export const Route = createFileRoute("/_authenticated/admin/")({
 	component: AdminDashboard,
 })
 
-const RECENT_ACTIVITY = [
-	{ icon: "person_add", title: "User baru terdaftar", time: "2 menit lalu" },
-	{ icon: "psychology", title: "Knowledge Base diperbarui ke v1.2", time: "1 jam lalu" },
-	{ icon: "description", title: "Prompt v1.3 dipublish", time: "3 jam lalu" },
-	{ icon: "warning", title: "5 user terdeteksi risiko tinggi", time: "5 jam lalu" },
-	{ icon: "forum", title: "342 chat session hari ini", time: "8 jam lalu" },
-]
+function formatActivityTime(date: Date | string): string {
+	const occurredAt = new Date(date)
+	const diffMs = Date.now() - occurredAt.getTime()
+	const minutes = Math.floor(diffMs / 60_000)
+	if (minutes < 1) return "baru saja"
+	if (minutes < 60) return `${minutes} menit lalu`
+	const hours = Math.floor(minutes / 60)
+	if (hours < 24) return `${hours} jam lalu`
+	const days = Math.floor(hours / 24)
+	return `${days} hari lalu`
+}
 
-const WEEKLY_BAR_HEIGHTS = [42, 58, 48, 72, 64, 88, 76]
+function getShortDay(date: string): string {
+	return new Date(date).toLocaleDateString("id-ID", { weekday: "short" })
+}
 
 function AdminDashboard() {
 	const { data, isLoading, error } = useAdminDashboard()
@@ -67,7 +73,13 @@ function AdminDashboard() {
 	const high = data?.riskTiers.high ?? 0
 	const medium = data?.riskTiers.medium ?? 0
 	const low = data?.riskTiers.low ?? 0
-	const totalSessions = 3241
+	const totalSessions = data?.totalChatSessions ?? 0
+	const totalAiMessages = data?.totalAiMessages ?? 0
+	const weeklyUserGrowth = data?.weeklyUserGrowth ?? []
+	const maxWeeklyUsers = Math.max(...weeklyUserGrowth.map((day) => day.count), 1)
+	const recentActivity = data?.recentActivity ?? []
+	const modelId = data?.settings.modelId ?? "-"
+	const knowledgeStatus = data?.settings.hasKnowledgeBase ? "Configured" : "Empty"
 
 	return (
 		<div ref={container} className="space-y-6">
@@ -82,38 +94,43 @@ function AdminDashboard() {
 				<article className="admin-stat-card admin-reveal">
 					<div className="admin-stat-header">
 						<div className="admin-stat-icon">
-							<span className="material-symbols-outlined" aria-hidden="true">group</span>
+							<span className="material-symbols-outlined" aria-hidden="true">
+								group
+							</span>
 						</div>
 					</div>
 					<p className="admin-stat-label">Total Users</p>
 					<p className="admin-stat-value">{totalUsers.toLocaleString("id-ID")}</p>
-					<p className="admin-stat-delta">
-						<span className="material-symbols-outlined" style={{ fontSize: 14 }} aria-hidden="true">trending_up</span>
-						+12 minggu ini
-					</p>
+					<p className="admin-toggle-desc">Berdasarkan database user</p>
 				</article>
 
 				<article className="admin-stat-card admin-reveal">
 					<div className="admin-stat-header">
 						<div className="admin-stat-icon success">
-							<span className="material-symbols-outlined" aria-hidden="true">forum</span>
+							<span className="material-symbols-outlined" aria-hidden="true">
+								forum
+							</span>
 						</div>
 					</div>
 					<p className="admin-stat-label">Total Chat Sessions</p>
 					<p className="admin-stat-value">{totalSessions.toLocaleString("id-ID")}</p>
-					<p className="admin-toggle-desc">7 hari terakhir</p>
+					<p className="admin-toggle-desc">Session tersimpan</p>
 				</article>
 
 				<article className="admin-stat-card admin-reveal">
 					<div className="admin-stat-header">
 						<div className="admin-stat-icon error">
-							<span className="material-symbols-outlined" aria-hidden="true">warning</span>
+							<span className="material-symbols-outlined" aria-hidden="true">
+								warning
+							</span>
 						</div>
 					</div>
 					<p className="admin-stat-label">High Risk Users</p>
 					<p className="admin-stat-value">{high}</p>
 					<p className="admin-stat-delta down">
-						<span className="material-symbols-outlined" style={{ fontSize: 14 }} aria-hidden="true">priority_high</span>
+						<span className="material-symbols-outlined" style={{ fontSize: 14 }} aria-hidden="true">
+							priority_high
+						</span>
 						perlu perhatian
 					</p>
 				</article>
@@ -121,12 +138,14 @@ function AdminDashboard() {
 				<article className="admin-stat-card admin-reveal">
 					<div className="admin-stat-header">
 						<div className="admin-stat-icon warning">
-							<span className="material-symbols-outlined" aria-hidden="true">psychology</span>
+							<span className="material-symbols-outlined" aria-hidden="true">
+								psychology
+							</span>
 						</div>
 					</div>
-					<p className="admin-stat-label">Knowledge Version</p>
-					<p className="admin-stat-value">v1.2</p>
-					<p className="admin-toggle-desc">diperbarui 1 jam lalu</p>
+					<p className="admin-stat-label">Knowledge Base</p>
+					<p className="admin-stat-value">{knowledgeStatus}</p>
+					<p className="admin-toggle-desc">{modelId}</p>
 				</article>
 			</section>
 
@@ -142,13 +161,18 @@ function AdminDashboard() {
 						</Link>
 					</div>
 					<div className="admin-chart-bars" role="img" aria-label="Bar chart user growth 7 hari">
-						{WEEKLY_BAR_HEIGHTS.map((h, i) => (
-							<div key={i} className="admin-chart-bar" style={{ height: `${h}%` }} title={`${h} users`} />
+						{weeklyUserGrowth.map((day) => (
+							<div
+								key={day.date}
+								className="admin-chart-bar"
+								style={{ height: `${(day.count / maxWeeklyUsers) * 100}%` }}
+								title={`${day.count} users`}
+							/>
 						))}
 					</div>
 					<div className="admin-chart-labels">
-						{["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"].map((d) => (
-							<span key={d}>{d}</span>
+						{weeklyUserGrowth.map((day) => (
+							<span key={day.date}>{getShortDay(day.date)}</span>
 						))}
 					</div>
 				</div>
@@ -167,7 +191,13 @@ function AdminDashboard() {
 								<span className="admin-toggle-name">{high}</span>
 							</div>
 							<div style={{ height: 8, background: "var(--outline-variant)", borderRadius: 9999, overflow: "hidden" }}>
-								<div style={{ width: `${totalUsers ? (high / totalUsers) * 100 : 0}%`, height: "100%", background: "var(--error)" }} />
+								<div
+									style={{
+										width: `${totalUsers ? (high / totalUsers) * 100 : 0}%`,
+										height: "100%",
+										background: "var(--error)",
+									}}
+								/>
 							</div>
 						</div>
 						<div>
@@ -176,7 +206,13 @@ function AdminDashboard() {
 								<span className="admin-toggle-name">{medium}</span>
 							</div>
 							<div style={{ height: 8, background: "var(--outline-variant)", borderRadius: 9999, overflow: "hidden" }}>
-								<div style={{ width: `${totalUsers ? (medium / totalUsers) * 100 : 0}%`, height: "100%", background: "var(--secondary)" }} />
+								<div
+									style={{
+										width: `${totalUsers ? (medium / totalUsers) * 100 : 0}%`,
+										height: "100%",
+										background: "var(--secondary)",
+									}}
+								/>
 							</div>
 						</div>
 						<div>
@@ -185,7 +221,13 @@ function AdminDashboard() {
 								<span className="admin-toggle-name">{low}</span>
 							</div>
 							<div style={{ height: 8, background: "var(--outline-variant)", borderRadius: 9999, overflow: "hidden" }}>
-								<div style={{ width: `${totalUsers ? (low / totalUsers) * 100 : 0}%`, height: "100%", background: "var(--tertiary)" }} />
+								<div
+									style={{
+										width: `${totalUsers ? (low / totalUsers) * 100 : 0}%`,
+										height: "100%",
+										background: "var(--tertiary)",
+									}}
+								/>
 							</div>
 						</div>
 					</div>
@@ -196,37 +238,43 @@ function AdminDashboard() {
 				<div className="admin-panel admin-reveal">
 					<div className="admin-panel-header">
 						<h3 className="admin-panel-title">Aktivitas Terbaru</h3>
-						<button type="button" className="admin-panel-link">Lihat semua</button>
+						<Link to="/admin/users" className="admin-panel-link">
+							Lihat users →
+						</Link>
 					</div>
 					<div>
-						{RECENT_ACTIVITY.map((a, i) => (
-							<div key={i} className="admin-activity-item">
-								<div className="admin-activity-icon">
-									<span className="material-symbols-outlined" aria-hidden="true">{a.icon}</span>
+						{recentActivity.length === 0 ? (
+							<p className="admin-toggle-desc">Belum ada aktivitas user.</p>
+						) : (
+							recentActivity.map((activity) => (
+								<div key={`${activity.type}-${activity.occurredAt}`} className="admin-activity-item">
+									<div className="admin-activity-icon">
+										<span className="material-symbols-outlined" aria-hidden="true">
+											person_add
+										</span>
+									</div>
+									<div className="admin-activity-content">
+										<p className="admin-activity-title">{activity.title}</p>
+										<p className="admin-activity-time">{formatActivityTime(activity.occurredAt)}</p>
+									</div>
 								</div>
-								<div className="admin-activity-content">
-									<p className="admin-activity-title">{a.title}</p>
-									<p className="admin-activity-time">{a.time}</p>
-								</div>
-							</div>
-						))}
+							))
+						)}
 					</div>
 				</div>
 
 				<div className="admin-panel admin-reveal">
 					<div className="admin-panel-header">
 						<h3 className="admin-panel-title">AI Usage Trend</h3>
-						<span className="admin-toggle-desc">7 hari</span>
+						<span className="admin-toggle-desc">Total tersimpan</span>
 					</div>
 					<div className="admin-usage-card-value" style={{ marginBottom: 8 }}>
-						12,847
+						{totalAiMessages.toLocaleString("id-ID")}
 					</div>
 					<p className="admin-toggle-desc">Total pesan AI diproses</p>
-					<div className="admin-chart-bars" style={{ height: 80, marginTop: 12 }}>
-						{[55, 70, 62, 80, 68, 90, 84].map((h, i) => (
-							<div key={i} className="admin-chart-bar" style={{ height: `${h}%`, background: "var(--tertiary)" }} />
-						))}
-					</div>
+					<p className="admin-toggle-desc" style={{ marginTop: 12 }}>
+						Diambil dari tabel companion_message.
+					</p>
 				</div>
 			</section>
 		</div>

@@ -1,5 +1,4 @@
 import type { AuthedContext } from "@api/application/shared/context"
-import { notFound } from "@api/application/shared/errors"
 import type { Cache } from "@api/domain/ports/cache"
 import { RISK_FACTORS } from "@api/domain/profile/profile"
 import type { ProfileRepository, ProfileUpdate } from "@api/domain/profile/profile-repository"
@@ -27,7 +26,7 @@ export const upsertProfileInput = z.object({
 export type UpsertProfileInput = z.infer<typeof upsertProfileInput>
 
 export interface ProfileUseCases {
-	getProfile(ctx: AuthedContext): Promise<NonNullable<Awaited<ReturnType<ProfileRepository["findByUserId"]>>>>
+	getProfile(ctx: AuthedContext): Promise<Awaited<ReturnType<ProfileRepository["findByUserId"]>>>
 	upsertProfile(
 		input: UpsertProfileInput,
 		ctx: AuthedContext,
@@ -42,7 +41,7 @@ export function makeProfile(deps: { repo: ProfileRepository; cache: Cache }): Pr
 			const cached = await cache.get<Awaited<ReturnType<ProfileRepository["findByUserId"]>>>(key)
 			if (cached) return cached
 			const profile = await repo.findByUserId(ctx.session.userId)
-			if (!profile) throw notFound("profile not found")
+			if (!profile) return null
 			await cache.set(key, profile, 300)
 			return profile
 		},
