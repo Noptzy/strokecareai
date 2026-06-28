@@ -1,6 +1,6 @@
-import { z } from "zod"
 import { existsSync } from "node:fs"
 import { resolve } from "node:path"
+import { z } from "zod"
 
 function loadProjectEnvFile() {
 	if (process.env.DATABASE_URL && process.env.BETTER_AUTH_SECRET) {
@@ -26,6 +26,7 @@ const envSchema = z.object({
 	PORT: z.coerce.number().int().positive().default(3001),
 	WEB_DIST_PATH: z.string().optional(),
 	NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+	OPENROUTER_API_KEY: z.string().min(1).default("development-openrouter-key"),
 	GOOGLE_CLIENT_ID: z.string().optional(),
 	GOOGLE_CLIENT_SECRET: z.string().optional(),
 	GITHUB_CLIENT_ID: z.string().optional(),

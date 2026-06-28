@@ -1,268 +1,403 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import "./onboarding.css";
+import { useForm } from "@tanstack/react-form"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { useOnboardingProfile } from "@web/hooks/use-onboarding-profile"
+import { RISK_FACTORS } from "@web/libs/orpc/schemas"
+import { z } from "zod"
+
+const onboardingSearchSchema = z.object({
+	step: z.number().catch(1),
+})
 
 export const Route = createFileRoute("/onboarding")({
-  component: Onboarding,
-});
+	validateSearch: onboardingSearchSchema,
+	component: Onboarding,
+})
 
-type Step = 1 | 2 | 3;
+type RiskFactor = (typeof RISK_FACTORS)[number]
 
-function Onboarding() {
-  const navigate = useNavigate();
-  const [step, setStep] = useState<Step>(1);
-  const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
-
-  const toggleCondition = (condition: string) => {
-    setSelectedConditions((prev) =>
-      prev.includes(condition)
-        ? prev.filter((c) => c !== condition)
-        : [...prev, condition]
-    );
-  };
-
-  const handleNextStep = (e: React.FormEvent) => {
-    e.preventDefault();
-    setStep(2);
-  };
-
-  const handlePrevStep = () => {
-    setStep(1);
-  };
-
-  const finishOnboarding = () => {
-    setStep(3);
-    setTimeout(() => {
-      navigate({ to: "/dashboard" });
-    }, 2500);
-  };
-
-  return (
-    <main className="flex-grow flex flex-col items-center justify-center px-4 py-12 md:py-24 relative overflow-hidden min-h-screen">
-      <div className="absolute top-[-10%] right-[-5%] w-[400px] h-[400px] bg-secondary-fixed/20 blur-[100px] rounded-full -z-10" />
-      <div className="absolute bottom-[-10%] left-[-5%] w-[300px] h-[300px] bg-primary-fixed/20 blur-[100px] rounded-full -z-10" />
-      
-      <div className="max-w-[600px] w-full space-y-stack-md z-10">
-        <div className="text-center mb-section-gap">
-          <h1 className="font-headline-lg text-headline-lg md:text-display text-primary tracking-tight">StrokeCare AI</h1>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-2">Mari sesuaikan pengalaman pemulihan Anda.</p>
-        </div>
-
-        {step < 3 && (
-          <div className="flex items-center justify-center space-x-unit mb-stack-md">
-            <div className={`h-1.5 w-12 rounded-full transition-all duration-300 ${step >= 1 ? "bg-primary" : "bg-surface-container-highest"}`} />
-            <div className={`h-1.5 w-12 rounded-full transition-all duration-300 ${step >= 2 ? "bg-primary" : "bg-surface-container-highest"}`} />
-          </div>
-        )}
-
-        <div className="bg-surface-container-low border border-outline-variant/10 rounded-xl p-8 md:p-12 shadow-sm relative overflow-hidden min-h-[500px]">
-          {step === 1 && (
-            <section className="step-transition fade-in block">
-              <div className="mb-stack-md">
-                <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">Tahap 1 dari 2</span>
-                <h2 className="font-headline-md text-headline-md text-on-surface mt-1">Informasi Pribadi</h2>
-              </div>
-              <form className="space-y-6" onSubmit={handleNextStep}>
-                <div className="space-y-2">
-                  <label className="font-label-caps text-label-caps text-on-surface-variant">Nama Lengkap</label>
-                  <input
-                    className="w-full bg-surface-container-lowest border border-outline/20 focus:border-secondary focus:ring-0 rounded-lg p-4 font-body-md text-on-surface transition-all placeholder:text-outline-variant"
-                    placeholder="Masukkan nama Anda"
-                    type="text"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="font-label-caps text-label-caps text-on-surface-variant">Umur</label>
-                    <input
-                      className="w-full bg-surface-container-lowest border border-outline/20 focus:border-secondary focus:ring-0 rounded-lg p-4 font-body-md text-on-surface transition-all"
-                      placeholder="Tahun"
-                      type="number"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="font-label-caps text-label-caps text-on-surface-variant">Jenis Kelamin</label>
-                    <select className="w-full bg-surface-container-lowest border border-outline/20 focus:border-secondary focus:ring-0 rounded-lg p-4 font-body-md text-on-surface transition-all appearance-none" required>
-                      <option value="">Pilih</option>
-                      <option value="male">Laki-laki</option>
-                      <option value="female">Perempuan</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="font-label-caps text-label-caps text-on-surface-variant">Tinggi Badan (cm)</label>
-                    <input
-                      className="w-full bg-surface-container-lowest border border-outline/20 focus:border-secondary focus:ring-0 rounded-lg p-4 font-body-md text-on-surface transition-all"
-                      placeholder="170"
-                      type="number"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="font-label-caps text-label-caps text-on-surface-variant">Berat Badan (kg)</label>
-                    <input
-                      className="w-full bg-surface-container-lowest border border-outline/20 focus:border-secondary focus:ring-0 rounded-lg p-4 font-body-md text-on-surface transition-all"
-                      placeholder="65"
-                      type="number"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="pt-6">
-                  <button
-                    type="submit"
-                    className="w-full bg-primary text-on-primary py-4 rounded-xl font-body-md font-bold hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center space-x-2"
-                  >
-                    <span>Lanjutkan</span>
-                    <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
-                  </button>
-                </div>
-              </form>
-            </section>
-          )}
-
-          {step === 2 && (
-            <section className="step-transition fade-in block">
-              <div className="mb-stack-md">
-                <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">Tahap 2 dari 2</span>
-                <h2 className="font-headline-md text-headline-md text-on-surface mt-1">Riwayat Medis & Gaya Hidup</h2>
-                <p className="text-caption font-caption text-on-surface-variant mt-2 leading-relaxed">Pilih kondisi yang relevan dengan riwayat kesehatan Anda saat ini.</p>
-              </div>
-              <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
-                <div className="grid grid-cols-1 gap-2">
-                  <ConditionButton
-                    id="hipertensi"
-                    label="Hipertensi"
-                    icon="pulse_alert"
-                    selected={selectedConditions.includes("hipertensi")}
-                    onToggle={() => toggleCondition("hipertensi")}
-                  />
-                  <ConditionButton
-                    id="diabetes"
-                    label="Diabetes"
-                    icon="blood_pressure"
-                    selected={selectedConditions.includes("diabetes")}
-                    onToggle={() => toggleCondition("diabetes")}
-                  />
-                  <ConditionButton
-                    id="kolesterol"
-                    label="Kolesterol Tinggi"
-                    icon="monitor_heart"
-                    selected={selectedConditions.includes("kolesterol")}
-                    onToggle={() => toggleCondition("kolesterol")}
-                  />
-                  <ConditionButton
-                    id="stroke"
-                    label="Pernah Stroke Sebelumnya"
-                    icon="neurology"
-                    selected={selectedConditions.includes("stroke")}
-                    onToggle={() => toggleCondition("stroke")}
-                  />
-                  <ConditionButton
-                    id="rokok"
-                    label="Merokok"
-                    icon="smoking_rooms"
-                    selected={selectedConditions.includes("rokok")}
-                    onToggle={() => toggleCondition("rokok")}
-                  />
-                  <ConditionButton
-                    id="alkohol"
-                    label="Konsumsi Alkohol"
-                    icon="wine_bar"
-                    selected={selectedConditions.includes("alkohol")}
-                    onToggle={() => toggleCondition("alkohol")}
-                  />
-                  <ConditionButton
-                    id="fisik"
-                    label="Aktivitas Fisik Rutin"
-                    icon="fitness_center"
-                    selected={selectedConditions.includes("fisik")}
-                    onToggle={() => toggleCondition("fisik")}
-                  />
-                </div>
-              </div>
-              <div className="pt-8 flex space-x-4">
-                <button
-                  type="button"
-                  onClick={handlePrevStep}
-                  className="flex-1 border border-outline/20 text-on-surface-variant py-4 rounded-xl font-body-md hover:bg-surface-container-high transition-all"
-                >
-                  Kembali
-                </button>
-                <button
-                  type="button"
-                  onClick={finishOnboarding}
-                  className="flex-[2] bg-primary text-on-primary py-4 rounded-xl font-body-md font-bold hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center space-x-2"
-                >
-                  <span>Selesai & Personalisasi</span>
-                  <span className="material-symbols-outlined text-[20px]">check</span>
-                </button>
-              </div>
-            </section>
-          )}
-
-          {step === 3 && (
-            <div className="flex flex-col items-center justify-center h-full space-y-stack-md fade-in py-12">
-              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-4">
-                <span className="material-symbols-outlined text-[48px]">verified</span>
-              </div>
-              <h2 className="font-headline-md text-headline-md text-center">Data Tersimpan!</h2>
-              <p className="text-on-surface-variant text-center max-w-[300px]">AI sedang menganalisis profil Anda untuk menyusun rencana pemulihan terbaik.</p>
-              <div className="w-full max-w-[200px] h-1.5 bg-surface-container-high rounded-full overflow-hidden mt-6">
-                <div className="h-full bg-primary animate-[loading_2s_ease-in-out_infinite]" />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {step < 3 && (
-          <div className="flex items-start space-x-3 bg-tertiary-container/10 p-4 rounded-xl border border-tertiary-container/20">
-            <span className="material-symbols-outlined text-tertiary text-[20px] mt-0.5">info</span>
-            <p className="text-caption font-caption text-on-tertiary-container leading-relaxed">
-              Data Anda aman dan terenkripsi. Informasi ini membantu AI kami merancang rencana rehabilitasi yang paling aman dan efektif sesuai kondisi fisiologis Anda.
-            </p>
-          </div>
-        )}
-      </div>
-    </main>
-  );
+const RISK_LABELS: Record<RiskFactor, string> = {
+	hypertension: "Hipertensi",
+	diabetes: "Diabetes",
+	smoking: "Merokok",
+	obesity: "Obesitas",
+	heart_disease: "Penyakit Jantung",
+	family_history: "Riwayat Keluarga",
 }
 
-function ConditionButton({
-  label,
-  icon,
-  selected,
-  onToggle,
-}: {
-  id: string;
-  label: string;
-  icon: string;
-  selected: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      className={`group flex items-center justify-between p-4 border rounded-xl transition-all text-left ${
-        selected ? "bg-primary-container/5 border-primary/40 selected" : "bg-surface-container-lowest border-outline/10 hover:border-secondary/30"
-      }`}
-    >
-      <div className="flex items-center space-x-4">
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${selected ? "bg-primary text-on-primary" : "bg-surface-container-high text-primary"}`}>
-          <span className="material-symbols-outlined text-[20px]">{icon}</span>
-        </div>
-        <span className="font-body-md text-on-surface">{label}</span>
-      </div>
-      <span
-        className={`material-symbols-outlined transition-colors ${selected ? "text-primary" : "text-outline-variant"}`}
-        style={{ fontVariationSettings: selected ? "'FILL' 1" : "'FILL' 0" }}
-      >
-        check_circle
-      </span>
-    </button>
-  );
+const ageField = z.string().refine((v) => {
+	const n = Number.parseInt(v, 10)
+	return Number.isFinite(n) && n >= 1 && n <= 120
+}, "Masukkan usia yang valid (1-120)")
+
+const riskFactorsField = z.array(z.enum(RISK_FACTORS)).min(1, "Pilih minimal satu faktor risiko")
+
+function Onboarding() {
+	const navigate = useNavigate({ from: Route.fullPath })
+	const mutation = useOnboardingProfile()
+	const { step } = Route.useSearch()
+	const setStep = (newStep: number) => void navigate({ search: { step: newStep } })
+
+	const form = useForm({
+		defaultValues: {
+			age: "",
+			gender: "",
+			height: "",
+			weight: "",
+			riskFactors: [] as RiskFactor[],
+			dailyFoodPattern: "",
+			sleepPattern: "",
+			stressLevel: "",
+			smokingStatus: "",
+			exercisePattern: "",
+			priorIllnesses: "",
+			familyMedicalHistory: "",
+			notes: "",
+		},
+		validators: {
+			onSubmitAsync: async ({ value }) => {
+				try {
+					await mutation.mutateAsync({
+						...value,
+						age: Number.parseInt(value.age, 10),
+						height: value.height ? Number.parseFloat(value.height) : undefined,
+						weight: value.weight ? Number.parseFloat(value.weight) : undefined,
+						onboardingCompleted: true,
+					})
+					return null
+				} catch (e) {
+					return { form: (e as Error).message }
+				}
+			},
+		},
+		onSubmit: async () => {
+			await navigate({ to: "/dashboard" })
+		},
+	})
+
+	return (
+		<main className="min-h-screen flex items-center justify-center bg-surface px-gutter py-section-gap">
+			<form
+				onSubmit={(e) => {
+					e.preventDefault()
+					e.stopPropagation()
+					if (step === 1) {
+						const { age, riskFactors } = form.state.values
+						if (age !== "" && riskFactors.length > 0) {
+							setStep(2)
+						}
+						return
+					}
+					void form.handleSubmit()
+				}}
+				className="max-w-2xl w-full bg-surface-container-low rounded-2xl border border-outline-variant/10 p-stack-md space-y-stack-md shadow-[0_10px_30px_-5px_rgba(0,0,0,0.04)]"
+			>
+				<header className="space-y-4">
+					<div className="flex items-center justify-between">
+						<span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">
+							Langkah {step} dari 2
+						</span>
+						<span className="font-label-caps text-label-caps text-on-surface-variant">
+							{Math.round((step / 2) * 100)}%
+						</span>
+					</div>
+					<div
+						role="progressbar"
+						aria-valuenow={step}
+						aria-valuemin={1}
+						aria-valuemax={2}
+						aria-label={`Langkah ${step} dari 2`}
+						className="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden"
+					>
+						<div className="h-full bg-primary transition-all duration-300" style={{ width: `${(step / 2) * 100}%` }} />
+					</div>
+					<h1 className="font-headline-lg text-headline-lg text-on-surface">
+						{step === 1 ? "Bio & Risiko Dasar" : "Gaya Hidup & Riwayat Medis"}
+					</h1>
+					<p className="font-body-md text-on-surface-variant">
+						Informasi ini membantu AI Companion memberikan saran yang paling relevan untuk Anda.
+					</p>
+				</header>
+
+				{step === 1 && (
+					<div className="space-y-stack-sm">
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<form.Field name="age" validators={{ onChange: ageField }}>
+								{(field) => (
+									<div className="space-y-2">
+										<label className="font-label-caps text-label-caps text-on-surface-variant">Usia *</label>
+										<input
+											type="number"
+											value={field.state.value}
+											onChange={(e) => field.handleChange(e.target.value)}
+											onBlur={field.handleBlur}
+											className="w-full bg-surface-container-lowest border border-outline/20 focus:border-primary rounded-lg p-3 font-body-md"
+										/>
+										{!field.state.meta.isValid && (
+											<p className="text-error text-xs">
+												{field.state.meta.errors.map((err) => err?.message).join(", ")}
+											</p>
+										)}
+									</div>
+								)}
+							</form.Field>
+
+							<form.Field name="gender">
+								{(field) => (
+									<div className="space-y-2">
+										<label className="font-label-caps text-label-caps text-on-surface-variant">Jenis Kelamin</label>
+										<select
+											value={field.state.value}
+											onChange={(e) => field.handleChange(e.target.value)}
+											onBlur={field.handleBlur}
+											className="w-full bg-surface-container-lowest border border-outline/20 focus:border-primary rounded-lg p-3 font-body-md"
+										>
+											<option value="">Pilih...</option>
+											<option value="L">Laki-laki</option>
+											<option value="P">Perempuan</option>
+										</select>
+									</div>
+								)}
+							</form.Field>
+
+							<form.Field name="height">
+								{(field) => (
+									<div className="space-y-2">
+										<label className="font-label-caps text-label-caps text-on-surface-variant">Tinggi Badan (cm)</label>
+										<input
+											type="number"
+											value={field.state.value}
+											onChange={(e) => field.handleChange(e.target.value)}
+											className="w-full bg-surface-container-lowest border border-outline/20 focus:border-primary rounded-lg p-3 font-body-md"
+										/>
+									</div>
+								)}
+							</form.Field>
+
+							<form.Field name="weight">
+								{(field) => (
+									<div className="space-y-2">
+										<label className="font-label-caps text-label-caps text-on-surface-variant">Berat Badan (kg)</label>
+										<input
+											type="number"
+											value={field.state.value}
+											onChange={(e) => field.handleChange(e.target.value)}
+											className="w-full bg-surface-container-lowest border border-outline/20 focus:border-primary rounded-lg p-3 font-body-md"
+										/>
+									</div>
+								)}
+							</form.Field>
+						</div>
+
+						<form.Field name="riskFactors" validators={{ onChange: riskFactorsField }}>
+							{(field) => (
+								<fieldset className="space-y-stack-sm pt-4">
+									<legend className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">
+										Faktor Risiko (pilih minimal satu) *
+									</legend>
+									<div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+										{RISK_FACTORS.map((rf) => {
+											const isOn = field.state.value.includes(rf)
+											return (
+												<button
+													key={rf}
+													type="button"
+													onClick={() =>
+														field.handleChange(
+															isOn ? field.state.value.filter((x) => x !== rf) : [...field.state.value, rf],
+														)
+													}
+													className={`rounded-lg border px-3 py-3 text-sm text-left transition-colors ${
+														isOn
+															? "bg-primary-container/30 border-primary text-primary"
+															: "bg-surface-container-lowest border-outline-variant/20 text-on-surface-variant hover:border-primary"
+													}`}
+												>
+													{RISK_LABELS[rf]}
+												</button>
+											)
+										})}
+									</div>
+									{!field.state.meta.isValid && (
+										<p className="text-error text-xs">
+											{field.state.meta.errors.map((err) => err?.message).join(", ")}
+										</p>
+									)}
+								</fieldset>
+							)}
+						</form.Field>
+					</div>
+				)}
+
+				{step === 2 && (
+					<div className="space-y-stack-sm">
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<form.Field name="smokingStatus">
+								{(field) => (
+									<div className="space-y-2">
+										<label className="font-label-caps text-label-caps text-on-surface-variant">Status Merokok</label>
+										<select
+											value={field.state.value}
+											onChange={(e) => field.handleChange(e.target.value)}
+											className="w-full bg-surface-container-lowest border border-outline/20 rounded-lg p-3"
+										>
+											<option value="">Pilih...</option>
+											<option value="Tidak Merokok">Tidak Merokok</option>
+											<option value="Pernah Merokok">Pernah Merokok</option>
+											<option value="Perokok Aktif">Perokok Aktif</option>
+										</select>
+									</div>
+								)}
+							</form.Field>
+
+							<form.Field name="stressLevel">
+								{(field) => (
+									<div className="space-y-2">
+										<label className="font-label-caps text-label-caps text-on-surface-variant">Tingkat Stres</label>
+										<select
+											value={field.state.value}
+											onChange={(e) => field.handleChange(e.target.value)}
+											className="w-full bg-surface-container-lowest border border-outline/20 rounded-lg p-3"
+										>
+											<option value="">Pilih...</option>
+											<option value="Rendah">Rendah</option>
+											<option value="Sedang">Sedang</option>
+											<option value="Tinggi">Tinggi</option>
+										</select>
+									</div>
+								)}
+							</form.Field>
+
+							<form.Field name="dailyFoodPattern">
+								{(field) => (
+									<div className="space-y-2 md:col-span-2">
+										<label className="font-label-caps text-label-caps text-on-surface-variant">Pola Makan Harian</label>
+										<input
+											value={field.state.value}
+											onChange={(e) => field.handleChange(e.target.value)}
+											placeholder="Contoh: Sering makan gorengan / Cukup sayur"
+											className="w-full bg-surface-container-lowest border border-outline/20 rounded-lg p-3"
+										/>
+									</div>
+								)}
+							</form.Field>
+
+							<form.Field name="exercisePattern">
+								{(field) => (
+									<div className="space-y-2 md:col-span-2">
+										<label className="font-label-caps text-label-caps text-on-surface-variant">Pola Olahraga</label>
+										<input
+											value={field.state.value}
+											onChange={(e) => field.handleChange(e.target.value)}
+											placeholder="Contoh: 2x seminggu jogging"
+											className="w-full bg-surface-container-lowest border border-outline/20 rounded-lg p-3"
+										/>
+									</div>
+								)}
+							</form.Field>
+
+							<form.Field name="priorIllnesses">
+								{(field) => (
+									<div className="space-y-2 md:col-span-2">
+										<label className="font-label-caps text-label-caps text-on-surface-variant">
+											Penyakit Terdahulu
+										</label>
+										<textarea
+											value={field.state.value}
+											onChange={(e) => field.handleChange(e.target.value)}
+											className="w-full bg-surface-container-lowest border border-outline/20 rounded-lg p-3 h-20"
+										/>
+									</div>
+								)}
+							</form.Field>
+
+							<form.Field name="familyMedicalHistory">
+								{(field) => (
+									<div className="space-y-2 md:col-span-2">
+										<label className="font-label-caps text-label-caps text-on-surface-variant">
+											Riwayat Penyakit Keluarga
+										</label>
+										<textarea
+											value={field.state.value}
+											onChange={(e) => field.handleChange(e.target.value)}
+											className="w-full bg-surface-container-lowest border border-outline/20 rounded-lg p-3 h-20"
+										/>
+									</div>
+								)}
+							</form.Field>
+
+							<form.Field name="notes">
+								{(field) => (
+									<div className="space-y-2 md:col-span-2">
+										<label className="font-label-caps text-label-caps text-on-surface-variant">Catatan Tambahan</label>
+										<textarea
+											value={field.state.value}
+											onChange={(e) => field.handleChange(e.target.value)}
+											placeholder="Ada hal lain yang perlu kami ketahui?"
+											className="w-full bg-surface-container-lowest border border-outline/20 rounded-lg p-3 h-20"
+										/>
+									</div>
+								)}
+							</form.Field>
+						</div>
+					</div>
+				)}
+
+				<form.Subscribe selector={(s) => s.errorMap.onSubmit}>
+					{(formError) =>
+						formError ? (
+							<div role="alert" className="bg-error-container/20 text-error rounded-lg p-3 text-sm">
+								{typeof formError === "string" ? formError : formError.form}
+							</div>
+						) : null
+					}
+				</form.Subscribe>
+
+				<div className="flex justify-between pt-4">
+					{step === 2 ? (
+						<button
+							type="button"
+							onClick={() => setStep(1)}
+							className="px-6 py-3 rounded-lg border border-outline/20 font-label-caps uppercase hover:bg-surface-container-high transition-colors text-on-surface-variant"
+						>
+							Kembali
+						</button>
+					) : (
+						<div />
+					)}
+
+					{step === 1 ? (
+						<form.Subscribe selector={(s) => [s.values.age, s.values.riskFactors]}>
+							{([age, riskFactors]) => {
+								const isValid = age !== "" && riskFactors.length > 0
+								return (
+									<button
+										type="button"
+										onClick={() => {
+											if (isValid) setStep(2)
+										}}
+										disabled={!isValid}
+										className="bg-primary text-on-primary rounded-lg px-8 py-3 font-label-caps uppercase tracking-widest hover:opacity-90 disabled:opacity-50"
+									>
+										Lanjut
+									</button>
+								)
+							}}
+						</form.Subscribe>
+					) : (
+						<form.Subscribe selector={(s) => s.isSubmitting}>
+							{(isSubmitting) => (
+								<button
+									type="submit"
+									disabled={isSubmitting}
+									className="bg-primary text-on-primary rounded-lg px-8 py-3 font-label-caps uppercase tracking-widest hover:opacity-90 disabled:opacity-50"
+								>
+									{isSubmitting ? "Menyimpan..." : "Selesai"}
+								</button>
+							)}
+						</form.Subscribe>
+					)}
+				</div>
+			</form>
+		</main>
+	)
 }

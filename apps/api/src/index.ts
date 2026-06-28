@@ -1,4 +1,6 @@
-export type { AppRouter } from "./presentation/routers/index.ts";
-export type { Session } from "./domain/session/session.ts";
-// Export a dummy client type for the frontend to consume
-export type AppRouterClient = any; 
+import type { Session } from "@api/domain/session/session"
+import type { AppRouter } from "@api/presentation/routers/index"
+import type { RouterClient } from "@orpc/server"
+
+export type { AppRouter, Session }
+export type AppRouterClient = RouterClient<AppRouter>

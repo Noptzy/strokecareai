@@ -1,8 +1,8 @@
+import type { Database } from "@api/infrastructure/db/client"
+import * as schema from "@api/infrastructure/db/schema"
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { admin } from "better-auth/plugins"
-import type { Database } from "../db/client.ts"
-import * as schema from "../db/schema.ts"
 
 export interface OAuthProviderCredentials {
 	clientId?: string
@@ -13,8 +13,8 @@ export interface AuthOptions {
 	db: Database
 	secret: string
 	url: string
-	webOrigin: string
-	providers: {
+	trustedOrigins?: string[]
+	providers?: {
 		google?: OAuthProviderCredentials
 		github?: OAuthProviderCredentials
 	}
@@ -22,13 +22,13 @@ export interface AuthOptions {
 
 export type EnabledAuthProvider = "google" | "github"
 
-export function getEnabledAuthProviders(providers: AuthOptions["providers"]): EnabledAuthProvider[] {
+export function getEnabledAuthProviders(providers: AuthOptions["providers"] = {}): EnabledAuthProvider[] {
 	return (Object.entries(providers) as [EnabledAuthProvider, OAuthProviderCredentials | undefined][])
 		.filter(([, credentials]) => Boolean(credentials?.clientId && credentials.clientSecret))
 		.map(([provider]) => provider)
 }
 
-function buildSocialProviders(providers: AuthOptions["providers"]) {
+function buildSocialProviders(providers: AuthOptions["providers"] = {}) {
 	const socialProviders: {
 		google?: { clientId: string; clientSecret: string }
 		github?: { clientId: string; clientSecret: string }
@@ -51,7 +51,7 @@ function buildSocialProviders(providers: AuthOptions["providers"]) {
 	return socialProviders
 }
 
-export function buildAuth({ db, secret, url, webOrigin, providers }: AuthOptions) {
+export function buildAuth({ db, secret, url, trustedOrigins, providers }: AuthOptions) {
 	return betterAuth({
 		database: drizzleAdapter(db, {
 			provider: "pg",
@@ -59,7 +59,7 @@ export function buildAuth({ db, secret, url, webOrigin, providers }: AuthOptions
 		}),
 		secret,
 		baseURL: url,
-		trustedOrigins: [webOrigin, url],
+		trustedOrigins: trustedOrigins ?? [],
 		emailAndPassword: {
 			enabled: true,
 			minPasswordLength: 8,

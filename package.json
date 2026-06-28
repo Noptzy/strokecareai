@@ -1,24 +1,22 @@
 {
-  "name": "stroke-ai",
-  "private": true,
-  "scripts": {
-    "dev": "moon run :dev",
-    "build": "moon run :build",
-    "lint": "moon run :lint",
-    "format": "moon run :format",
-    "check": "moon run :check",
-    "test": "moon run :test",
-    "db:push": "moon run api:db-push",
-    "db:generate": "moon run api:db-generate"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "1.8.3"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@biomejs/biome",
-      "esbuild"
-    ]
-  },
-  "packageManager": "pnpm@10.33.0"
+	"name": "stroke-ai",
+	"private": true,
+	"scripts": {
+		"dev": "moon run :dev",
+		"build": "moon run :build",
+		"lint": "moon run :lint",
+		"format": "moon run :format",
+		"check": "moon run :check",
+		"test": "moon run :test",
+		"db:push": "moon run api:db-push",
+		"db:generate": "moon run api:db-generate"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.8.3",
+		"@moonrepo/cli": "^2.3.3"
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": ["@biomejs/biome", "esbuild"]
+	},
+	"packageManager": "pnpm@10.33.0"
 }

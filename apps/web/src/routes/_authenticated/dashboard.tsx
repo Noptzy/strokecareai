@@ -1,213 +1,275 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { useGSAP } from "@gsap/react"
+import { Link, createFileRoute, redirect, useRouteContext } from "@tanstack/react-router"
+import { useProfile } from "@web/hooks/use-profile"
+import gsap from "gsap"
+import { useRef } from "react"
+import "./dashboard.css"
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  component: Dashboard,
-});
+	beforeLoad: ({ context }) => {
+		if (context.session?.user.role === "admin") {
+			throw redirect({ to: "/admin" })
+		}
+	},
+	component: Dashboard,
+})
+
+const NAV_ITEMS = [
+	{
+		to: "/diagnosa",
+		label: "Diagnosa",
+		description: "Lihat estimasi risiko stroke dan rekomendasi personal.",
+		icon: "monitor_heart",
+		accent: "bg-error-container/30 text-error",
+	},
+	{
+		to: "/companion",
+		label: "AI Companion",
+		description: "Diskusi gejala, faktor risiko, dan perjalanan pemulihan.",
+		icon: "forum",
+		accent: "bg-primary-container/40 text-primary",
+	},
+	{
+		to: "/recovery",
+		label: "Pemulihan",
+		description: "Latihan pernapasan, aktivitas ringan, dan nutrisi harian.",
+		icon: "self_improvement",
+		accent: "bg-tertiary-container/40 text-tertiary",
+	},
+	{
+		to: "/kenali-stroke",
+		label: "Kenali Stroke",
+		description: "Pelajari tanda-tanda awal stroke secara visual.",
+		icon: "visibility",
+		accent: "bg-secondary-container/40 text-secondary",
+	},
+] as const
+
+function getGreeting(): string {
+	const hour = new Date().getHours()
+	if (hour < 11) return "Selamat pagi"
+	if (hour < 15) return "Selamat siang"
+	if (hour < 18) return "Selamat sore"
+	return "Selamat malam"
+}
 
 function Dashboard() {
-  return (
-    <main className="max-w-[1100px] mx-auto px-gutter py-stack-md lg:py-section-gap">
-      <header className="mb-section-gap">
-        <h1 className="font-display text-display mb-2">Halo, Budi</h1>
-        <p className="font-body-lg text-body-lg text-on-surface-variant">Laporan kesehatan harian Anda sudah siap untuk ditinjau.</p>
-      </header>
+	const { data: profile, isPending, error } = useProfile()
+	const { session } = useRouteContext({ from: "/_authenticated" })
+	const userName = session?.user.name?.trim() || "Pengguna"
+	const container = useRef<HTMLElement>(null)
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter">
-        <section className="md:col-span-4 flex flex-col gap-gutter">
-          <div className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/10 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.04)]">
-            <div className="flex items-center gap-4 mb-6">
-              <div
-                className="w-16 h-16 rounded-full bg-cover bg-center border-2 border-white shadow-sm"
-                title="A warm, professional portrait of an elderly Indonesian man smiling gently."
-                style={{
-                  backgroundImage:
-                    "url('https://lh3.googleusercontent.com/aida-public/AB6AXuC1PiXoLoIlxqRYOZkqQOx_Hds-79EkB9rPcsppo8YIELNhQWiN7zKlWWSW0LZ1vz-ol7MF-XateB-DPOGS7uBuNjna9V2JVf8YqQu44MKFN-saZzt63YRn3roicphwn6_tclZ-4hTZeEkWukHWpCNhOipPrZuT3MlxXgzwyL611cfSILXXotasci8-0PhIL-gIPQKZBJuoPdASRvXqOBt-Yg4qwaDEemjZZAhdOneNjzYd90UWwnglkDPpCwUT9K_uRUlcp39Us6s')",
-                }}
-              />
-              <div>
-                <h2 className="font-headline-md text-headline-md">Profil Saya</h2>
-                <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Pasien Rawat Jalan</span>
-              </div>
-            </div>
-            <ul className="space-y-4">
-              <li className="flex justify-between items-center py-2 border-b border-outline-variant/5">
-                <span className="font-body-md text-body-md text-on-surface-variant">Usia</span>
-                <span className="font-body-md text-body-md font-medium">62 Tahun</span>
-              </li>
-              <li className="flex justify-between items-center py-2 border-b border-outline-variant/5">
-                <span className="font-body-md text-body-md text-on-surface-variant">Golongan Darah</span>
-                <span className="font-body-md text-body-md font-medium">O+</span>
-              </li>
-              <li className="flex justify-between items-center py-2">
-                <span className="font-body-md text-body-md text-on-surface-variant">Kontak Darurat</span>
-                <span className="font-body-md text-body-md font-medium">Siska (Anak)</span>
-              </li>
-            </ul>
-            <button className="w-full mt-6 py-3 border border-secondary text-secondary rounded-lg font-medium hover:bg-secondary/5 transition-colors">
-              Perbarui Profil
-            </button>
-          </div>
+	useGSAP(
+		() => {
+			gsap.from(".dashboard-reveal", {
+				opacity: 0,
+				y: 20,
+				duration: 0.6,
+				stagger: 0.1,
+				ease: "power3.out",
+			})
+			gsap.from(".dashboard-blob", {
+				scale: 0.6,
+				opacity: 0,
+				duration: 1.4,
+				ease: "power2.out",
+			})
+		},
+		{ dependencies: [profile], scope: container },
+	)
 
-          <div className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/10 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.04)]">
-            <h2 className="font-headline-md text-headline-md mb-4">Ringkasan Risiko</h2>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-error-container/30 rounded-lg">
-                <span className="material-symbols-outlined text-error" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
-                <p className="font-body-md text-body-md text-on-error-container">Hipertensi (Butuh Perhatian)</p>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-tertiary-container/20 rounded-lg">
-                <span className="material-symbols-outlined text-tertiary" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-                <p className="font-body-md text-body-md text-on-tertiary-container">Kadar Gula Darah Stabil</p>
-              </div>
-            </div>
-          </div>
-        </section>
+	if (isPending) {
+		return (
+			<main className="max-w-[1100px] mx-auto px-gutter py-section-gap">
+				<div
+					className="dashboard-animate h-40 rounded-2xl bg-surface-container-low animate-pulse"
+					aria-label="Memuat dashboard"
+				/>
+			</main>
+		)
+	}
 
-        <section className="md:col-span-8 flex flex-col gap-gutter">
-          <div className="bg-surface-container-low p-8 rounded-xl border border-outline-variant/10 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.04)]">
-            <div className="flex justify-between items-end mb-6">
-              <h2 className="font-headline-md text-headline-md">Faktor Risiko Saya</h2>
-              <span className="font-label-caps text-label-caps text-on-surface-variant cursor-pointer hover:text-primary">Lihat Detail</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="p-6 bg-surface rounded-xl border border-outline-variant/20 hover:border-secondary transition-all">
-                <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center mb-4">
-                  <span className="material-symbols-outlined text-secondary">blood_pressure</span>
-                </div>
-                <h3 className="font-headline-md text-[18px] mb-2">Tekanan Darah</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                  Tekanan darah tinggi merupakan faktor risiko utama stroke. Saat ini tekanan darah Anda 145/90 mmHg. Usahakan untuk mengurangi asupan garam.
-                </p>
-              </div>
-              <div className="p-6 bg-surface rounded-xl border border-outline-variant/20 hover:border-secondary transition-all">
-                <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center mb-4">
-                  <span className="material-symbols-outlined text-secondary">monitor_weight</span>
-                </div>
-                <h3 className="font-headline-md text-[18px] mb-2">Indeks Massa Tubuh</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                  Berat badan berlebih dapat membebani kerja jantung. Jalan santai 15 menit setiap pagi dapat membantu menjaga berat badan ideal.
-                </p>
-              </div>
-              <div className="p-6 bg-surface rounded-xl border border-outline-variant/20 hover:border-secondary transition-all">
-                <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center mb-4">
-                  <span className="material-symbols-outlined text-secondary">ecg_heart</span>
-                </div>
-                <h3 className="font-headline-md text-[18px] mb-2">Aktivitas Jantung</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                  Denyut jantung istirahat Anda dalam rentang normal (72 bpm). Menjaga pola tidur yang teratur sangat mendukung pemulihan saraf.
-                </p>
-              </div>
-              <div className="p-6 bg-surface rounded-xl border border-outline-variant/20 hover:border-secondary transition-all">
-                <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center mb-4">
-                  <span className="material-symbols-outlined text-secondary">restaurant</span>
-                </div>
-                <h3 className="font-headline-md text-[18px] mb-2">Pola Makan</h3>
-                <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                  Konsumsi buah dan sayur hijau Anda minggu ini meningkat. Ini adalah langkah tepat untuk menjaga elastisitas pembuluh darah.
-                </p>
-              </div>
-            </div>
-          </div>
+	if (error || !profile) {
+		return (
+			<main className="max-w-[1100px] mx-auto px-gutter py-section-gap space-y-stack-md">
+				<p className="font-body-md text-error">Profil belum diinisialisasi.</p>
+				<Link
+					to="/onboarding"
+					className="inline-flex items-center min-h-11 bg-primary text-on-primary rounded-lg px-5 py-2.5 font-label-caps text-label-caps uppercase tracking-widest hover:opacity-90 transition-opacity"
+				>
+					Mulai Onboarding
+				</Link>
+			</main>
+		)
+	}
 
-          <div className="bg-surface-container-low p-8 rounded-xl border border-outline-variant/10 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.04)]">
-            <h2 className="font-headline-md text-headline-md mb-6">Riwayat Percakapan</h2>
-            <div className="space-y-4">
-              <div className="group flex items-start gap-4 p-4 bg-surface rounded-lg cursor-pointer hover:bg-surface-container-high transition-colors">
-                <div className="mt-1 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
-                </div>
-                <div className="flex-1">
-                  <div className="flex justify-between items-center mb-1">
-                    <h4 className="font-body-md text-body-md font-semibold">"Bagaimana cara mengenali gejala awal stroke?"</h4>
-                    <span className="font-caption text-caption text-on-surface-variant">2 Jam Lalu</span>
-                  </div>
-                  <p className="font-body-md text-body-md text-on-surface-variant line-clamp-1 italic">Ingat metode FAST: Face, Arms, Speech, Time...</p>
-                </div>
-                <span className="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
-              </div>
-              <div className="group flex items-start gap-4 p-4 bg-surface rounded-lg cursor-pointer hover:bg-surface-container-high transition-colors">
-                <div className="mt-1 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>smart_toy</span>
-                </div>
-                <div className="flex-1">
-                  <div className="flex justify-between items-center mb-1">
-                    <h4 className="font-body-md text-body-md font-semibold">"Amankah saya berolahraga ringan sore ini?"</h4>
-                    <span className="font-caption text-caption text-on-surface-variant">Kemarin</span>
-                  </div>
-                  <p className="font-body-md text-body-md text-on-surface-variant line-clamp-1 italic">Tentu, selama tidak ada rasa pusing atau sesak napas berlebih...</p>
-                </div>
-                <span className="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
-              </div>
-            </div>
-            <button className="mt-4 flex items-center gap-2 text-primary font-medium hover:underline">
-              Buka Asisten AI <span className="material-symbols-outlined text-[18px]">open_in_new</span>
-            </button>
-          </div>
+	const riskFactorCount = profile.riskFactors.length
+	const onboardingProgress = profile.onboardingCompleted ? 100 : 35
+	const firstName = userName.split(" ")[0]
 
-          <div className="mb-gutter">
-            <h2 className="font-headline-md text-headline-md mb-6">Artikel Tersimpan</h2>
-            <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-              <div className="min-w-[280px] bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/10 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.04)] group">
-                <div
-                  className="h-32 w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                  title="A serene landscape photograph of a calm Japanese Zen garden."
-                  style={{
-                    backgroundImage:
-                      "url('https://lh3.googleusercontent.com/aida-public/AB6AXuC12JPuXE7Zgdi6maNcCZ7owh0C5iwBZvTtmlwrGFTSU7iA4xYHJSemAonJrWA9kgcBI15DGHjeGL-TAp7TCpgSNYdyUss5TJlDNxApd2A4GSvwftJKgw8h-mY66fVilg0rtNdoF2LpL_oJIKxYVBO7PeRqYQWfMkPGrJAQANCYGFy5F2EqlsleXGR4I2nLnNyUEnziGJFjskEUY7Pdw823eaXPIepNdVZInyWRo68QrzZ2u9SEqqExE6mOb8P4EM7aH7QHE9Ng1UU')",
-                  }}
-                />
-                <div className="p-4">
-                  <span className="font-label-caps text-label-caps text-secondary mb-2 block">NUTRISI</span>
-                  <h4 className="font-body-md text-body-md font-semibold mb-2">5 Makanan Peningkat Kinerja Saraf</h4>
-                  <p className="font-caption text-caption text-on-surface-variant line-clamp-2 mb-4">Konsumsi blueberry dan kenari terbukti membantu proses pemulihan...</p>
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[16px] text-on-surface-variant">schedule</span>
-                    <span className="font-caption text-caption text-on-surface-variant">4 Menit Baca</span>
-                  </div>
-                </div>
-              </div>
-              <div className="min-w-[280px] bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/10 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.04)] group">
-                <div
-                  className="h-32 w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                  title="A minimalist photograph of a person practicing tai-chi."
-                  style={{
-                    backgroundImage:
-                      "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDTkV0tTsp0SNGNmVJxKxu0rLUQMyxJqxMBIO2E08p78wd66oDFPQ8UJxXE1j3iWAUjDSArvZk_fOaNH84NvfFBXQcDWksP8VzFMhCmHcKEZJYTkIYh9Lr82brFDyXscB-mupsQECr6a_9s8iGxecgOeKrxH4-NA-sGI-hYlPOnQLTlGX3AFeUqMjtTacpy0v7ItDAVkoBxSSMl5kckEGISK7uxa6wUb3MaOlKeSlz_FwrFYK7TlTEPSt3EGKexd4yepkUfOPluMzw')",
-                  }}
-                />
-                <div className="p-4">
-                  <span className="font-label-caps text-label-caps text-secondary mb-2 block">LATIHAN</span>
-                  <h4 className="font-body-md text-body-md font-semibold mb-2">Latihan Koordinasi Tangan di Rumah</h4>
-                  <p className="font-caption text-caption text-on-surface-variant line-clamp-2 mb-4">Gerakan sederhana yang bisa Anda lakukan setiap pagi untuk melatih...</p>
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[16px] text-on-surface-variant">schedule</span>
-                    <span className="font-caption text-caption text-on-surface-variant">6 Menit Baca</span>
-                  </div>
-                </div>
-              </div>
-              <div className="min-w-[280px] bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/10 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.04)] group">
-                <div
-                  className="h-32 w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                  title="An artistic, minimalist illustration of a brain formed by delicate golden threads."
-                  style={{
-                    backgroundImage:
-                      "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDPzqdK3UnLCwVO27Eh2cr9MIQhdpdUX59D0Aw6qSFD4NWynzzbnxmOW83bUIYimBusDaX-DjQRAapWQHW4futzgqSP-7idm0T6R9OcBChAb2FitP9V1L1K7IFr-zJV_EnuA5Yb2C1Bb53pR27MFDj14YaaKZTgOEwcJHEJxcs9YGuLXQhJ88X7RGisriOxBsbUssVat-dqcNziZbQgq5bY8J3IRSKV4dVN-V5TxrhQeG4mUALOAzerXQLYOsX_Aze3EQ5giL89mFQ')",
-                  }}
-                />
-                <div className="p-4">
-                  <span className="font-label-caps text-label-caps text-secondary mb-2 block">SAINS</span>
-                  <h4 className="font-body-md text-body-md font-semibold mb-2">Memahami Neuroplastisitas Otak</h4>
-                  <p className="font-caption text-caption text-on-surface-variant line-clamp-2 mb-4">Bagaimana otak kita mampu membangun jalur baru setelah cedera...</p>
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[16px] text-on-surface-variant">schedule</span>
-                    <span className="font-caption text-caption text-on-surface-variant">8 Menit Baca</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-    </main>
-  );
+	return (
+		<main ref={container} className="max-w-[1100px] mx-auto px-gutter py-section-gap space-y-section-gap">
+			<section className="dashboard-hero dashboard-reveal relative overflow-hidden rounded-3xl border border-outline-variant/10 px-8 py-10 md:px-12 md:py-14">
+				<div
+					className="dashboard-hero-blob dashboard-blob w-72 h-72 bg-primary"
+					style={{ top: "-30%", right: "-10%" }}
+					aria-hidden="true"
+				/>
+				<div
+					className="dashboard-hero-blob dashboard-blob w-96 h-96 bg-secondary"
+					style={{ bottom: "-50%", left: "-15%" }}
+					aria-hidden="true"
+				/>
+
+				<div className="relative z-10 flex flex-col md:flex-row md:items-end md:justify-between gap-stack-md">
+					<div className="space-y-3 max-w-xl">
+						<span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">
+							{getGreeting()}
+						</span>
+						<h1 className="font-headline-lg text-headline-lg md:text-display text-on-surface tracking-tight">
+							Halo, {firstName}
+						</h1>
+						<p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+							Profil risiko Anda telah diperbarui. Lanjutkan perjalanan pemulihan Anda hari ini — setiap langkah kecil
+							bermakna.
+						</p>
+					</div>
+					<Link
+						to="/onboarding"
+						className="dashboard-reveal inline-flex items-center justify-center min-h-12 gap-2 bg-primary text-on-primary rounded-full px-6 py-3 font-label-caps text-label-caps uppercase tracking-widest hover:opacity-90 transition-opacity shadow-lg shadow-primary/20"
+					>
+						<span className="material-symbols-outlined text-[20px]" aria-hidden="true">
+							edit
+						</span>
+						Perbarui Profil
+					</Link>
+				</div>
+			</section>
+
+			<section className="grid grid-cols-1 md:grid-cols-3 gap-gutter" aria-label="Ringkasan profil">
+				<article className="dashboard-reveal dashboard-card-hover bg-surface-container-low rounded-2xl border border-outline-variant/10 p-stack-md space-y-stack-sm">
+					<div className="flex items-center justify-between">
+						<span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">
+							Usia
+						</span>
+						<span className="material-symbols-outlined text-on-surface-variant text-[20px]" aria-hidden="true">
+							cake
+						</span>
+					</div>
+					<p className="font-display text-headline-lg text-on-surface">
+						{profile.age ?? "—"}
+						<span className="font-body-md text-on-surface-variant ml-1">tahun</span>
+					</p>
+				</article>
+
+				<article className="dashboard-reveal dashboard-card-hover bg-surface-container-low rounded-2xl border border-outline-variant/10 p-stack-md space-y-stack-sm">
+					<div className="flex items-center justify-between">
+						<span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">
+							Faktor Risiko
+						</span>
+						<span className="material-symbols-outlined text-on-surface-variant text-[20px]" aria-hidden="true">
+							monitor_heart
+						</span>
+					</div>
+					<p className="font-display text-headline-lg text-on-surface">
+						{riskFactorCount}
+						<span className="font-body-md text-on-surface-variant ml-1">tercatat</span>
+					</p>
+				</article>
+
+				<article className="dashboard-reveal dashboard-card-hover bg-surface-container-low rounded-2xl border border-outline-variant/10 p-stack-md space-y-stack-sm">
+					<div className="flex items-center justify-between">
+						<span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">
+							Onboarding
+						</span>
+						<span className="material-symbols-outlined text-on-surface-variant text-[20px]" aria-hidden="true">
+							{profile.onboardingCompleted ? "verified" : "pending"}
+						</span>
+					</div>
+					<p className="font-display text-headline-lg text-on-surface">
+						{profile.onboardingCompleted ? "Selesai" : "Belum"}
+					</p>
+					<div className="dashboard-progress-track">
+						<div
+							className="dashboard-progress-fill"
+							style={{ width: `${onboardingProgress}%` }}
+							role="progressbar"
+							aria-valuenow={onboardingProgress}
+							aria-valuemin={0}
+							aria-valuemax={100}
+							aria-label="Progres onboarding"
+						/>
+					</div>
+				</article>
+			</section>
+
+			{profile.riskFactors.length > 0 && (
+				<section
+					className="dashboard-reveal bg-surface-container-low rounded-2xl border border-outline-variant/10 p-stack-md space-y-stack-sm"
+					aria-labelledby="faktor-risiko-heading"
+				>
+					<div className="flex items-center justify-between">
+						<h2
+							id="faktor-risiko-heading"
+							className="font-label-caps text-label-caps text-on-surface uppercase tracking-widest"
+						>
+							Faktor Risiko Anda
+						</h2>
+						<Link
+							to="/diagnosa"
+							className="font-label-caps text-label-caps text-primary uppercase tracking-widest hover:underline"
+						>
+							Lihat Detail
+						</Link>
+					</div>
+					<ul role="list" className="flex flex-wrap gap-2">
+						{profile.riskFactors.map((rf) => (
+							<li
+								key={rf}
+								className="text-sm bg-primary-container/40 text-on-primary-container px-3 py-1.5 rounded-full capitalize font-medium"
+							>
+								{rf.replace(/_/g, " ")}
+							</li>
+						))}
+					</ul>
+				</section>
+			)}
+
+			<section aria-labelledby="aksi-cepat-heading" className="space-y-stack-sm">
+				<h2
+					id="aksi-cepat-heading"
+					className="font-label-caps text-label-caps text-on-surface uppercase tracking-widest"
+				>
+					Aksi Cepat
+				</h2>
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+					{NAV_ITEMS.map((item) => (
+						<Link
+							key={item.to}
+							to={item.to}
+							className="dashboard-reveal dashboard-card-hover group bg-surface-container-low rounded-2xl border border-outline-variant/10 p-stack-md space-y-stack-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+						>
+							<div
+								className={`w-12 h-12 rounded-2xl ${item.accent} flex items-center justify-center transition-transform group-hover:scale-110`}
+							>
+								<span className="material-symbols-outlined text-[24px]" aria-hidden="true">
+									{item.icon}
+								</span>
+							</div>
+							<div className="space-y-1">
+								<h3 className="font-headline-md text-[18px] text-on-surface">{item.label}</h3>
+								<p className="font-body-md text-on-surface-variant leading-snug">{item.description}</p>
+							</div>
+							<div className="flex items-center gap-1 text-primary font-label-caps text-label-caps uppercase tracking-widest pt-2">
+								Buka
+								<span className="material-symbols-outlined dashboard-action-arrow text-[18px]" aria-hidden="true">
+									arrow_forward
+								</span>
+							</div>
+						</Link>
+					))}
+				</div>
+			</section>
+		</main>
+	)
 }
