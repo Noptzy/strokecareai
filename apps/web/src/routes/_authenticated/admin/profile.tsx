@@ -27,10 +27,6 @@ function AdminProfile() {
 					<label className="admin-form-label" htmlFor="role">Role</label>
 					<input id="role" className="admin-form-input" defaultValue={user?.role ?? "admin"} readOnly />
 				</div>
-				<div className="admin-form-field">
-					<label className="admin-form-label">Session ID</label>
-					<input className="admin-form-input" defaultValue={session?.session.id ?? ""} readOnly />
-				</div>
 			</div>
 			<p className="admin-form-help">Profil admin tidak dapat diubah dari konsol ini.</p>
 		</div>
