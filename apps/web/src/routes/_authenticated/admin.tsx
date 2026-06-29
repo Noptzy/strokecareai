@@ -30,30 +30,7 @@ const NAV_SECTIONS: NavSection[] = [
 		items: [
 			{ to: "/admin", label: "Dashboard", icon: "dashboard" },
 			{ to: "/admin/users", label: "Users", icon: "group" },
-			{ to: "/admin/knowledge", label: "Knowledge Base", icon: "psychology" },
 			{ to: "/admin/settings", label: "Settings", icon: "settings" },
-		],
-	},
-	{
-		label: "AI Management",
-		items: [
-			{ to: "/admin/sessions", label: "Chat Sessions", icon: "forum", badge: "Soon" },
-			{ to: "/admin/prompts", label: "Prompt Versions", icon: "description", badge: "Soon" },
-			{ to: "/admin/model", label: "Model Config", icon: "memory", badge: "Soon" },
-		],
-	},
-	{
-		label: "Analytics",
-		items: [
-			{ to: "/admin/usage", label: "Usage Analytics", icon: "monitoring", badge: "Soon" },
-			{ to: "/admin/risk-stats", label: "Risk Statistics", icon: "analytics", badge: "Soon" },
-		],
-	},
-	{
-		label: "System",
-		items: [
-			{ to: "/admin/notifications", label: "Notifications", icon: "notifications", badge: "Soon" },
-			{ to: "/admin/logs", label: "Logs", icon: "article", badge: "Soon" },
 		],
 	},
 	{
@@ -65,15 +42,7 @@ const NAV_SECTIONS: NavSection[] = [
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
 	"/admin": { title: "Dashboard", subtitle: "Ringkasan sistem StrokeCare AI" },
 	"/admin/users": { title: "Users", subtitle: "Kelola pengguna terdaftar" },
-	"/admin/knowledge": { title: "Knowledge Base", subtitle: "Kelola basis pengetahuan AI" },
 	"/admin/settings": { title: "Settings", subtitle: "Konfigurasi sistem" },
-	"/admin/sessions": { title: "Chat Sessions", subtitle: "Riwayat percakapan pengguna" },
-	"/admin/prompts": { title: "Prompt Versions", subtitle: "Versi prompt sistem" },
-	"/admin/model": { title: "Model Config", subtitle: "Konfigurasi model AI" },
-	"/admin/usage": { title: "Usage Analytics", subtitle: "Statistik penggunaan sistem" },
-	"/admin/risk-stats": { title: "Risk Statistics", subtitle: "Distribusi risiko pengguna" },
-	"/admin/notifications": { title: "Notifications", subtitle: "Notifikasi sistem" },
-	"/admin/logs": { title: "Logs", subtitle: "Log aktivitas sistem" },
 	"/admin/profile": { title: "Admin Profile", subtitle: "Profil administrator" },
 }
 
