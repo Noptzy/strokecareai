@@ -207,8 +207,8 @@ function getWeeklyUserGrowth(
 	const today = new Date()
 	const days = Array.from({ length: ADMIN_GROWTH_DAYS }, (_, index) => {
 		const date = new Date(today)
-		date.setHours(0, 0, 0, 0)
-		date.setDate(date.getDate() - (ADMIN_GROWTH_DAYS - 1 - index))
+		date.setUTCHours(0, 0, 0, 0)
+		date.setUTCDate(date.getUTCDate() - (ADMIN_GROWTH_DAYS - 1 - index))
 		return date
 	})
 
