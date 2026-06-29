@@ -1,47 +1,9 @@
 import { useGSAP } from "@gsap/react"
-import { createFileRoute } from "@tanstack/react-router"
+
 import gsap from "gsap"
 import { useEffect, useRef, useState } from "react"
 import { useAdminSettings } from "@web/hooks/use-admin-settings"
 import { useUpdateAdminSettings } from "@web/hooks/use-update-admin-settings"
-
-export const Route = createFileRoute("/_authenticated/admin/knowledge")({
-	component: AdminKnowledge,
-})
-
-type TabId = "general" | "medical" | "prompt-rules" | "emergency"
-
-const TABS: { id: TabId; label: string }[] = [
-	{ id: "general", label: "General" },
-	{ id: "medical", label: "Medical" },
-	{ id: "prompt-rules", label: "Prompt Rules" },
-	{ id: "emergency", label: "Emergency Protocol" },
-]
-
-const SECTIONS_BY_TAB: Record<TabId, { id: string; title: string; icon: string }[]> = {
-	general: [
-		{ id: "context", title: "Context", icon: "info" },
-		{ id: "stroke-symptoms", title: "Stroke Symptoms", icon: "monitor_heart" },
-		{ id: "nutrition", title: "Nutrition", icon: "restaurant" },
-		{ id: "rehabilitation", title: "Rehabilitation", icon: "self_improvement" },
-		{ id: "emergency-flow", title: "Emergency Flow", icon: "emergency" },
-	],
-	medical: [
-		{ id: "diagnostic-criteria", title: "Diagnostic Criteria", icon: "medical_services" },
-		{ id: "medications", title: "Medications", icon: "medication" },
-		{ id: "lab-values", title: "Lab Values", icon: "science" },
-	],
-	"prompt-rules": [
-		{ id: "guardrails", title: "Guardrails", icon: "shield" },
-		{ id: "style", title: "Communication Style", icon: "style" },
-		{ id: "fallback", title: "Fallback Behavior", icon: "support" },
-	],
-	emergency: [
-		{ id: "red-flags", title: "Red Flag Detection", icon: "flag" },
-		{ id: "fast-check", title: "FAST Check Protocol", icon: "emergency" },
-		{ id: "referral", title: "Referral Guidelines", icon: "local_hospital" },
-	],
-}
 
 const VERSIONS = [
 	{ version: "v1.2", time: "1 jam lalu", isCurrent: true },
@@ -49,12 +11,10 @@ const VERSIONS = [
 	{ version: "v1.0", time: "2 minggu lalu" },
 ]
 
-function AdminKnowledge() {
+export function KnowledgeTab() {
 	const { data, isLoading, error } = useAdminSettings()
 	const updateSettings = useUpdateAdminSettings()
 	const container = useRef<HTMLDivElement>(null)
-	const [tab, setTab] = useState<TabId>("general")
-	const [activeSection, setActiveSection] = useState("context")
 	const [content, setContent] = useState("")
 	const [savedAt, setSavedAt] = useState<Date | null>(null)
 
@@ -98,46 +58,9 @@ function AdminKnowledge() {
 		)
 	}
 
-	const sections = SECTIONS_BY_TAB[tab]
-
 	return (
-		<div ref={container}>
-			<div className="admin-tabs admin-reveal">
-				{TABS.map((t) => (
-					<button
-						key={t.id}
-						type="button"
-						className={`admin-tab ${tab === t.id ? "active" : ""}`}
-						onClick={() => {
-							setTab(t.id)
-							setActiveSection(SECTIONS_BY_TAB[t.id][0]?.id ?? "")
-						}}
-					>
-						{t.label}
-					</button>
-				))}
-			</div>
-
-			<div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 20 }} className="admin-knowledge-grid">
-				<aside className="admin-panel admin-reveal" style={{ padding: 12 }}>
-					<h3 className="admin-toggle-name" style={{ padding: "8px 12px", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--on-surface-variant)" }}>
-						Sections
-					</h3>
-					<nav>
-						{sections.map((s) => (
-							<button
-								key={s.id}
-								type="button"
-								className={`admin-nav-item ${activeSection === s.id ? "active" : ""}`}
-								onClick={() => setActiveSection(s.id)}
-								style={{ fontSize: 13 }}
-							>
-								<span className="material-symbols-outlined" aria-hidden="true">{s.icon}</span>
-								<span className="admin-nav-item-label">{s.title}</span>
-							</button>
-						))}
-					</nav>
-				</aside>
+		<div ref={container} style={{ paddingTop: 16 }}>
+			<div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20 }} className="admin-knowledge-grid">
 
 				<section className="admin-panel admin-reveal">
 					<div className="admin-panel-header">
