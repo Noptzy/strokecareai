@@ -21,6 +21,7 @@ COPY apps/web apps/web
 COPY apps/api/src apps/api/src
 COPY apps/api/tsconfig.json apps/api/
 COPY apps/api/package.json apps/api/
+COPY assets assets
 RUN pnpm --filter @strokecare/web build
 
 # ---------- api-build ----------
